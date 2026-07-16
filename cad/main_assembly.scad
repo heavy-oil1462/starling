@@ -112,10 +112,12 @@ for (side = [1, -1]) mirror([side < 0 ? 1 : 0, 0, 0]) {
     // aileron at the outboard TE, horn up, short link from the servo arm
     // tip above the wing (horn_pos matches the servo arm plane)
     aileron_hinge_z = wing_station - rib_chord / 2 + ctrl_chord;
+    // the servo arm plane sits 9.2 outboard of the rib station (flange seat
+    // + boss + horn plate); the aileron horn and wire live on that plane
     color("Gold")
         translate([300, 0, aileron_hinge_z])
             rotate([0, -90, -90])
-                control_surface(span = 120, horn_pos = 25.5, horn_up = true);
-    pushrod([wing_servo_station + 15.5, 7.7, wing_station - 11],
-            [wing_servo_station + 15.5, ctrl_horn_r, aileron_hinge_z - 2]);
+                control_surface(span = 120, horn_pos = wing_servo_station + 9.2 - 300, horn_up = true);
+    pushrod([wing_servo_station + 9.2, 7.7, wing_station - 11],
+            [wing_servo_station + 9.2, ctrl_horn_r, aileron_hinge_z - 2]);
 }
