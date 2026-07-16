@@ -18,8 +18,8 @@
 |---|---|---|
 | Fuselage | (bought, not printed) | 50 mm-class paper/postal tube, ~53 mm OD |
 | Nose cone | `cad/nose.scad` | Sleeve-mounted, angled FPV camera opening |
-| Wing adapter | `cad/wing_adapter.scad` | Slides on the tube; carbon-rod sockets for the wing panels |
-| Wing ribs | `cad/wing_rib.scad` | NACA airfoil ribs on 6 mm carbon spars, foam-board skin |
+| Wing adapter | `cad/wing_adapter.scad` | Slides on the tube, M3 belly clamp; through-sockets for the wing spars |
+| Wing ribs | `cad/wing_rib.scad`, `cad/wing_rib_root.scad` | NACA airfoil ribs on 6 mm carbon spars, foam-board skin; the root rib slides over the adapter tab |
 | Tail | `cad/tail.scad` | One print: sleeve + fins with living hinges, 3 servo pockets, rear motor mount (pusher) |
 | Calibration prints | `cad/calibration/` | Tube fit ring, motor screw pattern, servo pocket — print these first |
 
@@ -35,8 +35,8 @@ python3 scripts/check_params.py   # do the parts still fit the same tube?
 python3 scripts/render_scad.py cad/nose.scad nose.png   # one-off render
 ```
 
-`scripts/regen_all.py` is the single entry point for derived artifacts — the STLs and `main_assembly.png` are build products and regenerate with the CAD that changed them. Interface dimensions (tube OD, spar size/spacing, tab/slot fits) are checked across files so the parts can never silently disagree about the tube they share.
+`scripts/regen_all.py` is the single entry point for derived artifacts — the STLs and `main_assembly.png` are build products and regenerate with the CAD that changed them. Every dimension two parts share (tube OD, clearances, spar chain, servo/motor footprints, stations) lives in **`cad/design_params.scad`**; parts include it, and `check_params.py` fails the build if any file shadows a shared name — so the parts can never silently disagree about the tube they share.
 
 ## Status
 
-Early prototype. Structural parts exist and print; assembly integration, wing skin, and the ArduPilot configuration are in progress. See `docs/design-review.md` for the current known issues.
+Early prototype. Structural parts exist, print, and fit together on paper (see `docs/design-review.md` for the reviewed-and-fixed findings and the open follow-ups: measure your actual tube, pick the motor/prop combo). Wing skin build notes and the ArduPilot configuration are next.

@@ -11,7 +11,8 @@ Open-source, cheap, quick-to-build RC plane: a paper-tube fuselage (50 mm-class 
 
 ## Layout
 
-- `cad/` — one .scad per printable part + `main_assembly.scad` (visual fit check, renders to `main_assembly.png`)
+- `cad/design_params.scad` — **single source of truth** for every dimension two parts share. Parts `include` it; `check_params.py` fails the build if any file shadows one of its names. Change shared values there and only there.
+- `cad/` — one .scad per printable part + `main_assembly.scad` (visual fit check, renders to `main_assembly.png`; all placement derives from design_params, e.g. `wing_station`)
 - `cad/calibration/` — small test prints for dialing in fits (tube ring, motor pattern, servo pocket)
 - `cad/archive/` — dead versions, never rendered or reviewed
 - `stl/` — committed build products, print-ready; regenerate, never hand-edit

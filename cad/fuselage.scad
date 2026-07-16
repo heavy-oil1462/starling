@@ -1,23 +1,18 @@
-tube_diameter           = 52.95;
-wall_thickness          = 3;
-length                  = 540;
+// Visual model of the bought paper tube — NOT a printed part (regen_all.py
+// deliberately exports no STL for it). Exists so main_assembly.scad can
+// show the parts in context.
 
-// Calculate the necessary radii
-outer_radius = tube_diameter / 2;
-inner_radius = outer_radius - wall_thickness;
+include <design_params.scad>
 
 module fuselage() {
-    // The difference module subtracts the second shape (inner cylinder) 
-    // from the first shape (outer cylinder).
     difference() {
-        // Outer Cylinder (Solid part)
-        cylinder(h = length, r = outer_radius);
-
-        // Inner Cylinder (The hollow part to be subtracted)
-        cylinder(h = length, r = inner_radius);
+        cylinder(h = tube_length, r = tube_od / 2);
+        // extend the cutter past both ends — coincident faces make the
+        // boolean result non-manifold
+        translate([0, 0, -0.1])
+            cylinder(h = tube_length + 0.2, r = tube_od / 2 - tube_wall);
     }
 }
 
-// --- Render the Module ---
-$fn=100; // Increased segments for a smoother render
+$fn = 100;
 fuselage();

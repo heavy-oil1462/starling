@@ -25,7 +25,9 @@ from render_scad import render
 
 ROOT = Path(__file__).resolve().parent.parent
 PARTS_DIRS = [ROOT / "cad", ROOT / "cad" / "calibration"]
-NON_PARTS = {"main_assembly"}  # assemblies render to PNG, not STL
+# Not printable parts: the assembly renders to PNG, design_params is data,
+# and the fuselage is the bought paper tube (visual model only).
+NON_PARTS = {"main_assembly", "design_params", "fuselage"}
 
 
 def parts():

@@ -2,29 +2,35 @@
 //   CONFIGURABLE VARIABLES
 // ==============================================================================
 
+include <design_params.scad>
+
 // --- Global Resolution ---
 $fn = 100; // Smooth curves
 
 // --- Main Fuselage Dimensions ---
-tube_diameter       = 52.94;           // Inner diameter (fits over the 50mm tube)
-wall_thickness      = 3;               // Thickness of the sleeve wall
 fuselage_total_length = 90;            // Total length (Positive Z direction)
 
 // --- Derived Fuselage Values ---
-tube_radius         = tube_diameter / 2;
-outer_radius        = tube_radius + wall_thickness;
-sleeve_fillet_radius = wall_thickness; // Radius of the front lip
+tube_radius         = (tube_od + sleeve_clearance) / 2;
+outer_radius        = tube_radius + sleeve_wall;
+sleeve_fillet_radius = sleeve_wall;    // Radius of the front lip
 motor_mount_solid_length = 4;          // Solid section at rear (starts at Z=0)
 
-// --- Internal Rim Dimensions (NEW) ---
-rim_z_position      = 50;              // Distance from Z=0 to the bottom of the rim
+// --- Internal Rim (tube stop) ---
+// Keeps the paper tube from sliding over the servo bodies, which protrude
+// into the bore at z ~4-36. The rim top (= tail_tube_stop) is where the
+// tube bottoms out; main_assembly.scad places the tube from the same value.
 rim_height          = 4;               // Height of the rim (in Z)
-rim_thickness       = 2;               // Thickness of the rim (radial)
+rim_thickness       = 2;               // Radial protrusion into the bore
+rim_z_position      = tail_tube_stop - rim_height;
 
 // --- Fin Dimensions ---
 fin_thickness       = 4;
 fin_servo_gap       = 0;               // Gap for control surfaces
 fin_inset           = 1;               // Depth fins penetrate into body
+// TE hinge groove: a slot for taping/gluing in the control-surface hinge
+// (foam or hinge strip). NOT a living hinge — printed living hinges crack
+// after a few dozen cycles.
 hinge_slit_thickness = 1.5;
 hinge_slit_depth    = 2;
 
@@ -40,23 +46,23 @@ horizontal_fin_root = fuselage_total_length; // Matches body length
 horizontal_fin_tip  = 30;
 horizontal_fin_sweep = 5;
 
-// --- Motor Mount ---
-motor_shaft_hole_dia = 10;
+// --- Motor Mount (pattern comes from design_params) ---
+// NOTE: control surfaces extend aft of the motor face — mount the prop on a
+// standoff at least as long as the control-surface chord, or keep the prop
+// radius under the fin-root cutout span, so full deflection clears the disc.
 motor_wire_hole_dia  = 10;
-motor_mount_spacing  = 30;
-motor_mount_hole_dia = 4;
 motor_mount_screw_hole_depth = motor_mount_solid_length + 0.2;
 
-// --- Servo & Cutout Configuration ---
-servo_body_dims_plate   = [23, 12.2]; // [Length Z, Width Tangential]
-servo_flange_dims_plate = [32, 12.2];
+// --- Servo & Cutout Configuration (footprint comes from design_params) ---
+servo_body_dims_plate   = servo_body;   // [Length Z, Width Tangential]
+servo_flange_dims_plate = servo_flange;
 
 servo_body_length   = servo_body_dims_plate[0];
 servo_body_width    = servo_body_dims_plate[1];
 servo_flange_length = servo_flange_dims_plate[0];
 servo_flange_width  = servo_flange_dims_plate[1];
 
-tol                 = 0.2;             // Printing tolerance
+tol                 = fit_tol;         // Printing tolerance (shared)
 epsilon             = 1;               // Cut overlap
 pushrod_offset      = 6;               // Offset from fin centerline
 blister_pad_thickness = 2;             // External protrusion for servo mount
@@ -132,6 +138,15 @@ module tail_assembly() {
 // ==============================================================================
 
 module fuselage_sleeve() {
+    // Internal rim (tube stop) — added after the main difference so the
+    // bore cut doesn't erase it
+    translate([0, 0, rim_z_position])
+        difference() {
+            cylinder(rim_height, r = tube_radius + 0.5); // buried into the wall
+            translate([0, 0, -0.1])
+                cylinder(rim_height + 0.2, r = tube_radius - rim_thickness);
+        }
+
     difference() {
         // --- Solids ---
         union() {
@@ -157,17 +172,17 @@ module fuselage_sleeve() {
             
             // Motor Shaft (Starts below 0, goes through solid)
             translate([0, 0, -0.1])
-            cylinder(motor_mount_solid_length + 0.2, d=motor_shaft_hole_dia);
-            
+            cylinder(motor_mount_solid_length + 0.2, d=motor_shaft_hole_d);
+
             // Wire Hole
             translate([-10, 10, -0.1])
             cylinder(motor_mount_solid_length + 0.2, d=motor_wire_hole_dia);
-            
-            // Motor Mount Screw Pattern
-            translate([ 0, 19/2, -0.1 ]) cylinder(motor_mount_screw_hole_depth, d=motor_mount_hole_dia);
-            translate([ 0, -19/2, -0.1 ]) cylinder(motor_mount_screw_hole_depth, d=motor_mount_hole_dia);
-            translate([ 16/2, 0, -0.1 ]) cylinder(motor_mount_screw_hole_depth, d=motor_mount_hole_dia);
-            translate([ -16/2, 0, -0.1 ]) cylinder(motor_mount_screw_hole_depth, d=motor_mount_hole_dia);
+
+            // Motor Mount Screw Pattern (matches calibration/motor_mount_test.scad)
+            translate([ 0, motor_pattern_y/2, -0.1 ]) cylinder(motor_mount_screw_hole_depth, d=motor_screw_hole_d);
+            translate([ 0, -motor_pattern_y/2, -0.1 ]) cylinder(motor_mount_screw_hole_depth, d=motor_screw_hole_d);
+            translate([ motor_pattern_x/2, 0, -0.1 ]) cylinder(motor_mount_screw_hole_depth, d=motor_screw_hole_d);
+            translate([ -motor_pattern_x/2, 0, -0.1 ]) cylinder(motor_mount_screw_hole_depth, d=motor_screw_hole_d);
         }
     }
 }

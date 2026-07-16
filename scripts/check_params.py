@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Cross-file parameter consistency check for the Starling CAD files.
+"""Interface-dimension guard for the Starling CAD files.
 
-Every printed part interfaces with the paper fuselage tube, so dimensions
-like the tube diameter MUST agree across files. This script parses the
-top-level `name = value;` assignments of every .scad under cad/ (archive
-excluded) and reports any parameter that is defined in more than one file
-with different values.
+cad/design_params.scad is the single source of truth for every dimension
+two parts must agree on. This script enforces it:
 
-Exit code 1 if any INTERFACE-critical parameter disagrees, 0 otherwise
-(other mismatches are printed as informational — chord vs chord etc. may
-legitimately differ per part).
+  FAIL — any .scad under cad/ (archive excluded) re-declares a name that
+         design_params.scad defines, with any value. Parts must consume
+         the shared value, never shadow it — so mismatches cannot exist.
+  info — any other parameter assigned differing numeric literals in more
+         than one file (may be legitimate, worth a look).
+
+Exit 1 on FAIL, 0 otherwise.
 
 Usage:
     scripts/check_params.py
@@ -21,69 +22,51 @@ from collections import defaultdict
 from pathlib import Path
 
 CAD = Path(__file__).resolve().parent.parent / "cad"
+DESIGN_PARAMS = CAD / "design_params.scad"
 
-# Parameters that describe a physical interface between parts: any
-# disagreement here means parts will not fit together.
-INTERFACE = {
-    "tube_diameter",
-    "tube_outer_diameter",
-    "carbon_spar_diameter",
-    "hole_diameter",       # wing adapter rod sockets = rib spar holes
-    "spar_spacing",
-    "hole_spacing",        # adapter socket spacing = rib spar spacing
-    "wing_tab_thickness",
-    "adapter_slot_thickness",
-}
-
-# Names that mean the same interface dimension in different files.
-ALIASES = {
-    "tube_outer_diameter": "tube_diameter",
-    "hole_diameter": "carbon_spar_diameter",
-    "hole_spacing": "spar_spacing",
-    "adapter_slot_thickness": "wing_tab_thickness",
-}
-
-ASSIGN = re.compile(r"(?m)^\s*(\w+)\s*=\s*([-\d.][^;]*?)\s*;")
+ASSIGN = re.compile(r"(?m)^\s*(\w+)\s*=\s*([^;]+?)\s*;")
 
 
 def scad_files():
-    return [p for p in sorted(CAD.rglob("*.scad")) if "archive" not in p.parts]
-
-
-def collect():
-    values = defaultdict(dict)  # canonical name -> {file: value}
-    for path in scad_files():
-        for m in ASSIGN.finditer(path.read_text()):
-            name, raw = m.group(1), m.group(2)
-            try:
-                val = float(raw)
-            except ValueError:
-                continue  # derived expression, skip
-            canon = ALIASES.get(name, name)
-            rel = str(path.relative_to(CAD.parent))
-            # keep first top-level literal per file
-            values[canon].setdefault(rel, (name, val))
-    return values
+    return [p for p in sorted(CAD.rglob("*.scad"))
+            if "archive" not in p.parts and p != DESIGN_PARAMS]
 
 
 def main():
-    values = collect()
-    failures = 0
-    for canon in sorted(values):
-        per_file = values[canon]
-        distinct = {v for (_, v) in per_file.values()}
-        if len(per_file) > 1 and len(distinct) > 1:
-            critical = canon in INTERFACE
-            tag = "FAIL" if critical else "info"
-            print(f"[{tag}] {canon} disagrees:")
-            for rel, (name, val) in sorted(per_file.items()):
-                alias = f" (as {name})" if name != canon else ""
-                print(f"        {val:<8g} {rel}{alias}")
-            failures += critical
-    if failures:
-        print(f"\n{failures} interface parameter(s) disagree — parts will not fit together.")
+    shared = {m.group(1) for m in ASSIGN.finditer(DESIGN_PARAMS.read_text())}
+    if not shared:
+        print(f"[FAIL] no parameters found in {DESIGN_PARAMS}")
         return 1
-    print("all interface parameters consistent")
+
+    failures = 0
+    numeric = defaultdict(dict)  # name -> {file: value}, non-shared literals
+    for path in scad_files():
+        rel = str(path.relative_to(CAD.parent))
+        for m in ASSIGN.finditer(path.read_text()):
+            name, raw = m.groups()
+            if name in shared:
+                print(f"[FAIL] {rel}: '{name} = {raw};' shadows design_params.scad"
+                      " — delete it and use the shared value")
+                failures += 1
+                continue
+            try:
+                numeric[name].setdefault(rel, float(raw))
+            except ValueError:
+                pass  # derived expression, not a literal
+
+    for name in sorted(numeric):
+        per_file = numeric[name]
+        if len(per_file) > 1 and len(set(per_file.values())) > 1:
+            print(f"[info] {name} differs between files (fine if unrelated,"
+                  " move to design_params.scad if not):")
+            for rel, val in sorted(per_file.items()):
+                print(f"        {val:<8g} {rel}")
+
+    if failures:
+        print(f"\n{failures} shadowed parameter(s) — the shared value in"
+              " cad/design_params.scad is the only place these may be set.")
+        return 1
+    print(f"ok: {len(shared)} shared parameters, no shadowing")
     return 0
 
 

@@ -35,10 +35,9 @@ Notes (do not rediscover):
 
 ## Starling interface rules to verify
 
-- **One tube, one number**: every sleeve/plug references the same paper-tube OD (~53 mm 50 mm-class postal tube). `check_params.py` enforces this across `tube_diameter`/`tube_outer_diameter`.
-- **Wing spar chain**: rib spar holes = adapter rod sockets — 6.2 mm holes, 20 mm spacing, for 6 mm carbon rod. (`carbon_spar_diameter`/`hole_diameter`, `spar_spacing`/`hole_spacing`.)
-- **Adapter tab ↔ rib slot**: `wing_tab_thickness` (wing_adapter.scad) must equal `adapter_slot_thickness` (wing_rib.scad).
-- Sleeves that slide on the tube get a print clearance; plugs that go inside subtract the paper wall (~2 mm). Fit is validated with `cad/calibration/tube_fit_ring.scad` — change the clearance there first, print, then propagate.
+- **`cad/design_params.scad` is the single source of truth** for every dimension two parts share (tube OD, clearances, spar chain, tab/slot, servo/motor footprints, stations). Parts `include` it; `check_params.py` FAILS if any file re-declares one of its names. Never fix a mismatch locally — change the shared value.
+- **Wing spar chain**: rib spar holes = adapter rod sockets = carbon rods (`spar_hole_d`, `spar_spacing`, `spar_y_offset`); the root-rib window derives from `wing_tab_thickness + fit_tol`, so alignment holds by construction. Verify by rendering the assembly, not by reading numbers.
+- Sleeve bores are `tube_od + sleeve_clearance`. Fit is validated with `cad/calibration/tube_fit_ring.scad` — adjust `sleeve_clearance` in design_params, print the ring, then trust the sleeves.
 - The wing mount must stay movable along the tube (CG adjustment) — no feature may assume a fixed wing station.
 - Payload adapters clamp the round tube; new payload parts should reuse the sleeve interface, not invent a new mount.
 

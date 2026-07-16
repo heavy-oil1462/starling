@@ -1,43 +1,26 @@
-// --- Motor Mount Variables ---
-// Copied from your rc_tail_assembly_v3.scad file
-motor_shaft_hole_dia = 10;
-motor_mount_hole_dia = 4;
-hole_pattern_x = 16; // The 16mm dimension
-hole_pattern_y = 19; // The 19mm dimension
+// MOTOR MOUNT TEST — flat plate with the motor screw pattern and shaft
+// hole from design_params, to verify against the real motor before
+// printing the whole tail.
 
-// --- Test Plate Variables ---
-plate_width = 40;  // Total width of the test plate
-plate_height = 40; // Total height of the test plate
-plate_thickness = 2;   // Thickness of the test plate
+include <../design_params.scad>
 
-$fn = 50; // For smooth holes
+plate_width     = 40;
+plate_height    = 40;
+plate_thickness = 2;
 
-// --- Create the Test Plate ---
+$fn = 50;
+
 difference() {
-    // 1. The main solid plate
     cube([plate_width, plate_height, plate_thickness], center = true);
-    
-    // 2. The cutouts
-    
+
     // Center shaft hole
-    translate([0, 0, 0])
-    cylinder(h = plate_thickness + 2, d = motor_shaft_hole_dia, center = true);
-    
-    // --- 16x19mm "+" (plus) pattern ---
-    
-    // Hole 1 (Top, +Y)
-    translate([ 0, hole_pattern_y / 2, 0 ])
-    cylinder(h = plate_thickness + 2, d = motor_mount_hole_dia, center = true);
-    
-    // Hole 2 (Bottom, -Y)
-    translate([ 0, -hole_pattern_y / 2, 0 ])
-    cylinder(h = plate_thickness + 2, d = motor_mount_hole_dia, center = true);
-    
-    // Hole 3 (Right, +X)
-    translate([ hole_pattern_x / 2, 0, 0 ])
-    cylinder(h = plate_thickness + 2, d = motor_mount_hole_dia, center = true);
-    
-    // Hole 4 (Left, -X)
-    translate([ -hole_pattern_x / 2, 0, 0 ])
-    cylinder(h = plate_thickness + 2, d = motor_mount_hole_dia, center = true);
+    cylinder(h = plate_thickness + 2, d = motor_shaft_hole_d, center = true);
+
+    // Screw pattern — the same "+" layout the tail's motor face uses
+    for (p = [[0,  motor_pattern_y / 2],
+              [0, -motor_pattern_y / 2],
+              [ motor_pattern_x / 2, 0],
+              [-motor_pattern_x / 2, 0]])
+        translate([p[0], p[1], 0])
+            cylinder(h = plate_thickness + 2, d = motor_screw_hole_d, center = true);
 }

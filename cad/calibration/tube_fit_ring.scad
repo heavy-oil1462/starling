@@ -1,22 +1,18 @@
-// --- Test Ring Variables ---
-// Copied from your main file to ensure accuracy
-tube_diameter = 52.9; // The inner diameter
-wall_thickness = 4;    // The wall thickness
-test_length = 10;      // The length of the test piece
+// TUBE FIT RING — 10-minute print to verify tube_od / sleeve_clearance
+// before trusting any real sleeve. If the fit is wrong, adjust
+// sleeve_clearance (or the measured tube_od) in cad/design_params.scad,
+// reprint, repeat — never tune an individual part.
 
-// --- Calculations ---
-tube_radius = tube_diameter / 2;
-outer_radius = tube_radius + wall_thickness;
+include <../design_params.scad>
 
-$fn=100; // For a smooth circle
+test_length = 10;
 
-// --- Create the Test Ring ---
-// We'll create a solid outer ring and subtract the inner hole.
+tube_radius  = (tube_od + sleeve_clearance) / 2;
+outer_radius = tube_radius + sleeve_wall;
+
+$fn = 100;
+
 difference() {
-    // 1. Outer solid cylinder
     cylinder(h = test_length, r = outer_radius, center = true);
-    
-    // 2. Inner cutout
-    // We make the cutout slightly taller to ensure a clean boolean operation
     cylinder(h = test_length + 2, r = tube_radius, center = true);
 }
