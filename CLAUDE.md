@@ -38,6 +38,6 @@ Conventions:
 
 - Fuselage: ~53 mm OD paper/postal tube (calibrate with `cad/calibration/tube_fit_ring.scad` before trusting any sleeve fit)
 - Wing spars: 6 mm carbon rods (6.2 mm printed holes)
-- Servos: 9 g class (SG90 footprint), all mounted INTERNALLY — tail servos on pads inside the sleeve, aileron servos clipped to the spars inside the wing; wire pushrods exit through small slots (drag rule: nothing but the slot meets the airflow). Throw/slot/clearance numbers: `scripts/throw_check.py`, rationale in `docs/control-system.md`.
+- Servos: 9 g class (SG90 footprint), all mounted INTERNALLY — tail servos on pads inside the sleeve, aileron servos carried by a servo rib (`wing_rib_servo.scad`); wire pushrods exit through small slots (drag rule: nothing but the slot meets the airflow). Throw/slot/clearance numbers: `scripts/throw_check.py`, rationale in `docs/control-system.md`.
 - Pushrods: 1.2 mm piano wire; control surfaces hinge on a tape/PP strip glued into matching grooves (never a printed living hinge)
 - Motor: 16×19 mm screw pattern (22xx class), rear-mounted (pusher)

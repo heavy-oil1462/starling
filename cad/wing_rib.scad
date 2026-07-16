@@ -6,9 +6,12 @@
 //   the rib profile is the wing's inner mold line.
 //
 //   wing_rib_with_cutouts() — standard rib: two spar holes + a cable hole
-//   wing_rib_root()         — root rib: adds the through-window that slides
-//                             over the wing-adapter tab (print 1 per panel,
-//                             see cad/wing_rib_root.scad)
+//   wing_rib_servo()        — servo rib: adds an open-bottom bay aft of the
+//                             rear spar that carries the aileron servo
+//                             (print 1 per panel, see cad/wing_rib_servo.scad)
+//
+//   All ribs sit OUTBOARD of the adapter tab (innermost station > tab tip) —
+//   ribs never overlap the adapter.
 // ==============================================================================
 
 include <design_params.scad>
@@ -98,20 +101,26 @@ module wing_rib_with_cutouts() {
     }
 }
 
-// Root rib: a through-window, centered on the spar holes, that slides over
-// the wing-adapter tab — so the rod sockets and rib spar holes line up by
-// construction. The window may nick the upper surface near its forward edge:
-// the tab stands slightly proud of the thin front of the profile there, and
-// the rib is glued to the tab anyway.
-module wing_rib_root() {
-    window_l = adapter_length + fit_tol;
-    window_h = wing_tab_thickness + fit_tol;
-    window_center_x = rib_chord * (1 - spar_x_pos) + spar_spacing / 2;
+// Servo rib: carries the aileron servo. An open-bottom bay aft of the rear
+// spar takes the servo body (inserted from below, lying flat: shaft along
+// the span, arm swinging in the chord-vertical plane, up through the top
+// skin); the servo's flange seats on the rib's OUTBOARD face, overlapping
+// the bay ends — tack it with CA or strapping tape.
+// The aft bay of a 15%/100 mm section is thinner than a 9 g servo, so the
+// bay opens through the bottom and the servo sits ~3 mm proud of the LOWER
+// skin — fair it with tape, or drop to a 5 g servo which fits flush. The
+// strip above the bay thins to ~1.5 mm; the glued-on top skin backs it up.
+// The bay's forward edge keeps ~1 mm of material to the rear spar hole.
+module wing_rib_servo() {
+    bay_l    = servo_body[0] + fit_tol;
+    bay_h    = servo_body[1] + fit_tol;
+    bay_x_hi = rib_chord * 0.56;   // bay spans 44%..67.4% chord, aft of the rear spar
+    bay_y0   = -6.9;               // keeps a printable strip under the top surface
 
     difference() {
         wing_rib_with_cutouts();
-        translate([window_center_x - window_l / 2, spar_y_offset - window_h / 2, -rib_thickness])
-            cube([window_l, window_h, rib_thickness * 2]);
+        translate([bay_x_hi - bay_l, bay_y0, -rib_thickness])
+            cube([bay_l, bay_h, rib_thickness * 2]);
     }
 }
 

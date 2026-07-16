@@ -17,12 +17,15 @@ use <nose.scad>
 use <fuselage.scad>
 use <servo_9g.scad>
 use <control_surface.scad>
-use <wing_servo_mount.scad>
 include <design_params.scad>
 
 $fn = 60;
 
-rib_stations = [40, 120, 200, 280, 360, 440]; // spanwise; first = root rib on the tab
+// Spanwise rib stations. The first sits just OUTBOARD of the adapter tab tip
+// (~44.5) — ribs never overlap the adapter. The servo rib is placed
+// separately at wing_servo_station.
+rib_stations = [47, 120, 200, 280, 360, 440];
+wing_servo_station = 310;
 spar_length  = 460;
 
 sleeve_r  = (tube_od + sleeve_clearance) / 2 + sleeve_wall;
@@ -88,31 +91,31 @@ for (side = [1, -1]) mirror([side < 0 ? 1 : 0, 0, 0]) {
 
     // ribs (rib local X maps to global Z via rotate([0,-90,0]); shifting down
     // by spar_y_offset puts the spar holes on the adapter socket axis)
-    for (i = [0 : len(rib_stations) - 1])
+    for (s = rib_stations)
         color("Gold")
-            translate([rib_stations[i], -spar_y_offset, wing_station - rib_chord / 2])
+            translate([s, -spar_y_offset, wing_station - rib_chord / 2])
                 rotate([0, -90, 0])
-                    if (i == 0) wing_rib_root();
-                    else        wing_rib_with_cutouts();
+                    wing_rib_with_cutouts();
 
-    // aileron servo mount clipped onto both spars, moved outboard so the
-    // aileron sits DIRECTLY BEHIND it; the servo arm pokes through a small
-    // skin slot and links to the aileron horn ABOVE the wing (low-pressure
-    // side). The rib cable holes now only carry the servo lead inboard.
-    translate([310, -7.5, wing_station + adapter_length / 2 - spar_spacing / 2])
-        rotate([0, -90, -90]) {
-            color("SteelBlue") wing_servo_mount();
-            translate([-4, -11, 2.5])
-                rotate([0, -90, 0])
-                    servo_9g(horn_angle = -90);   // arm straight up
-        }
+    // servo rib: carries the aileron servo in its open-bottom bay aft of the
+    // rear spar; the servo's flange seats on the rib's outboard face, the
+    // arm pokes through the upper skin, and the aileron sits directly
+    // behind. Rib cable holes carry the servo lead inboard.
+    color("Gold")
+        translate([wing_servo_station, -spar_y_offset, wing_station - rib_chord / 2])
+            rotate([0, -90, 0])
+                wing_rib_servo();
+    translate([wing_servo_station - 13.5, -8.4, wing_station + 6])
+        rotate([180, 0, 90])
+            servo_9g(horn_angle = -90);   // arm straight up, ⊥ to the wire
 
     // aileron at the outboard TE, horn up, short link from the servo arm
-    // tip above the wing (horn_pos matches the servo arm plane at x=322)
+    // tip above the wing (horn_pos matches the servo arm plane)
     aileron_hinge_z = wing_station - rib_chord / 2 + ctrl_chord;
     color("Gold")
         translate([300, 0, aileron_hinge_z])
             rotate([0, -90, -90])
-                control_surface(span = 120, horn_pos = 22, horn_up = true);
-    pushrod([322, 11, wing_station - 11], [322, ctrl_horn_r, aileron_hinge_z - 2]);
+                control_surface(span = 120, horn_pos = 24.5, horn_up = true);
+    pushrod([wing_servo_station + 14.5, 7.7, wing_station - 11],
+            [wing_servo_station + 14.5, ctrl_horn_r, aileron_hinge_z - 2]);
 }

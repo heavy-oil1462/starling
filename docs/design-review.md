@@ -11,7 +11,7 @@ Reviewed by rendering every part headlessly (`scripts/regen_all.py`) and inspect
    **Fixed:** both sides now derive from the shared `wing_tab_thickness` (11); the root-rib window is `wing_tab_thickness + fit_tol` by construction.
 
 3. **The rib's adapter/foam slots were declared but never cut.**
-   **Fixed (adapter):** new `wing_rib_root()` (exported as `stl/wing_rib_root.stl`, one per panel) cuts a through-window centered on the spar holes that slides over the adapter tab, so rib holes and adapter sockets align by construction.
+   **Fixed (adapter):** first via a windowed root rib that slid over the tab; superseded same day — ribs now simply sit *outboard* of the tab tip (first station 47 > tab tip 44.5), so no rib ever overlaps the adapter, and panel alignment comes from the bonded spar rods.
    **Removed (foam):** the foam-skin slots were geometrically impossible — a 5 mm skin cannot be inlaid into a ~15 mm-thick section — so the dead parameters are gone and the design intent is documented in `wing_rib.scad`: the skin *wraps* the ribs; the rib profile is the inner mold line.
 
 4. **The tail's internal rim (tube stop) was declared but never modeled**, letting the tube slide into the servo bodies.

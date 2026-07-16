@@ -19,10 +19,9 @@
 | Fuselage | (bought, not printed) | 50 mm-class paper/postal tube, ~53 mm OD |
 | Nose cone | `cad/nose.scad` | Sleeve-mounted, angled FPV camera opening |
 | Wing adapter | `cad/wing_adapter.scad` | Slides on the tube, M3 belly clamp; through-sockets for the wing spars |
-| Wing ribs | `cad/wing_rib.scad`, `cad/wing_rib_root.scad` | NACA airfoil ribs on 6 mm carbon spars, foam-board skin; the root rib slides over the adapter tab |
+| Wing ribs | `cad/wing_rib.scad`, `cad/wing_rib_servo.scad` | NACA airfoil ribs on 6 mm carbon spars, foam-board skin; all ribs sit outboard of the adapter tab, and the servo rib carries the aileron servo |
 | Tail | `cad/tail.scad` | One print: sleeve + fins, internal servo pads, pushrod wall slots, rear motor mount (pusher) |
 | Control surfaces | `cad/control_surface.scad` | One part, three spans (elevator/rudder/aileron); tape-strip hinge in matching grooves |
-| Wing servo mount | `cad/wing_servo_mount.scad` | Clips onto both spars near the tube; servo hides inside the wing, wire runs to the aileron |
 | Calibration prints | `cad/calibration/` | Tube fit ring, motor screw pattern, servo pocket — print these first |
 
 All servos mount internally — the tail servos sit high in the sleeve with angled wire slots, the aileron servos hide inside the wing with just the arm through the upper skin. Mechanical throw: ±32° tail / ±45° aileron vs ±25°/±20° targets — analysis in `docs/control-system.md`, checked by `scripts/throw_check.py`.

@@ -24,13 +24,18 @@ linkage is most linear and transmits the most motion.
   nothing but that slot — the previous design had a flange pocket, blister
   pad, and exposed horn+rod on the outside of a Ø59 mm body; this removes
   all of it.
-- **Wing (aileron ×2)** — a printed cradle (`cad/wing_servo_mount.scad`)
-  snap-clips onto both carbon spars, positioned so the aileron sits
-  **directly behind the servo**. The servo hides inside the wing under the
-  foam skin; only its arm pokes through a small slot in the **upper** skin
-  (the low-pressure side — the high-pressure lower surface stays clean),
-  and a short wire links it to the aileron's up-turned horn just above the
-  wing. The rib cable holes carry the servo lead inboard to the fuselage.
+- **Wing (aileron ×2)** — the servo mounts to a dedicated **servo rib**
+  (`cad/wing_rib_servo.scad`): an open-bottom bay aft of the rear spar takes
+  the body, and the servo's flange seats on the rib's outboard face (CA/
+  strapping tape; the rib itself is bonded to spars and skin, so the servo
+  reacts against real structure — an earlier spar-clip cradle was dropped
+  because printed clips on smooth carbon rod rotate, creep, and pry open
+  under wire loads). The aileron sits **directly behind the servo**; the arm
+  pokes through a small slot in the **upper** skin (low-pressure side) and a
+  short wire links to the aileron's up-turned horn just above the wing. A
+  9 g servo stands ~3 mm proud of the LOWER skin at the bay (the aft bay of
+  a 15 %/100 mm section is thinner than the servo) — fair it with tape, or
+  use a 5 g servo which fits flush. Rib cable holes carry the lead inboard.
 
 ## Control surfaces
 

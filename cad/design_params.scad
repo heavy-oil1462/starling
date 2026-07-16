@@ -35,7 +35,7 @@ naca_code     = 2415;  // cambered lifting section
 rib_thickness = 2;
 
 // --- Wing adapter <-> root rib interface ---
-wing_tab_thickness = 11; // adapter tab; the root-rib window = this + fit_tol
+wing_tab_thickness = 11; // adapter tab (socket carrier; ribs sit outboard of it)
 wing_tab_span      = 15; // how far the tab reaches out from the sleeve
 adapter_length     = 40; // sleeve length = tab chord extent
 
