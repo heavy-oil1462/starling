@@ -54,13 +54,16 @@ color("SteelBlue") translate([0, 0, wing_station]) wing_adapter();
 // Pocket floor sits at r=21.4, so the servo side face is at 21.4 and the
 // shaft pivot at r=15.3.
 // ------------------------------------------------------------------------------
-tail_control(0,  88, tail_servo_z, 233,  [23.3, -(ctrl_horn_r + 0.3), tail_servo_z + 12]);
+// (fin roots now sit on the socket bosses, 2.5 outboard of the sleeve)
+fin_root = sleeve_r + 2.5;
+
+tail_control(0,  88, tail_servo_z, 229,  [22.7, -(ctrl_horn_r + 0.3), tail_servo_z + 12.4]);
 mirror([1, 0, 0])
-    tail_control(0, 88, tail_servo_z, 233, [23.3, -(ctrl_horn_r + 0.3), tail_servo_z + 12]);
-tail_control(90, 60, tail_rudder_z, -38, [21.5, -(ctrl_horn_r + 0.3), tail_rudder_z - 1.9]);
+    tail_control(0, 88, tail_servo_z, 229, [22.7, -(ctrl_horn_r + 0.3), tail_servo_z + 12.4]);
+tail_control(90, 60, tail_rudder_z, -34, [20.8, -(ctrl_horn_r + 0.3), tail_rudder_z - 2.3]);
 
 module tail_control(angle, span, z0, horn_angle, arm_tip) {
-    horn_eye = [sleeve_r + 11, -ctrl_horn_r, hinge_z - 2];
+    horn_eye = [fin_root + 12, -ctrl_horn_r, hinge_z - 2];
 
     rotate([0, 0, angle]) {
         // servo in its pocket, shaft end down (aft), arm toward the slot
@@ -72,7 +75,7 @@ module tail_control(angle, span, z0, horn_angle, arm_tip) {
         pushrod(arm_tip, horn_eye);
         // printed control surface, hinged in the fin TE groove
         color("Gold")
-            translate([sleeve_r - 1 + 10, 0, hinge_z])
+            translate([fin_root + 10, 0, hinge_z])
                 rotate([0, -90, -90])
                     control_surface(span = span, horn_pos = 2);
     }

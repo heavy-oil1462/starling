@@ -20,7 +20,8 @@
 | Nose cone | `cad/nose.scad` | Sleeve-mounted, angled FPV camera opening |
 | Wing adapter | `cad/wing_adapter.scad` | Slides on the tube, M3 belly clamp; through-sockets for the wing spars |
 | Wing ribs | `cad/wing_rib.scad`, `cad/wing_rib_servo.scad` | NACA airfoil ribs on 6 mm carbon spars, foam-board skin; all ribs sit outboard of the adapter tab, and the servo rib carries the aileron servo |
-| Tail | `cad/tail.scad` | One print: sleeve + fins, internal servo pads, pushrod wall slots, rear motor mount (pusher) |
+| Tail sleeve | `cad/tail.scad` | Prints upright, support-free: internal push-fit servo pockets, angled pushrod slots, fin sockets, rear motor mount (pusher) |
+| Tail fins | `cad/tail_fin_horizontal.scad` (×2), `cad/tail_fin_vertical.scad` | Print flat (strongest orientation); root tabs glue into the sleeve's fin sockets |
 | Control surfaces | `cad/control_surface.scad` | One part, three spans (elevator/rudder/aileron); tape-strip hinge in matching grooves |
 | Calibration prints | `cad/calibration/` | Tube fit ring, motor screw pattern, servo pocket — print these first |
 

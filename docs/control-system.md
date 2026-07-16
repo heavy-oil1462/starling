@@ -14,17 +14,19 @@ neutral the arm sits **perpendicular to the wire** — that is where the
 linkage is most linear and transmits the most motion.
 
 - **Tail (elevator ×2, rudder ×1)** — each servo lies on its side, shaft
-  tangential, and **presses into a snug printed pocket** on the inner sleeve
-  wall (walls grip the outer 6 mm of the body on three sides, open toward
-  the shaft so the arm can swing; a drop of CA is optional and the tube,
-  once installed, boxes the servos in radially). Three 22 mm bodies cannot
-  share one height in the Ø53 bore, so they are **Z-staggered**: the two
-  elevator servos sit HIGH (`tail_servo_z`, opposite sides — their bodies
-  coexist), the rudder servo sits LOW (`tail_rudder_z`, arm swinging just
-  above the motor plate). Each wire rakes outboard through an **angled wall
-  slot** aligned with its run — elevators down-aft at 37°, rudder up-forward
-  at 52°. The outer surface carries nothing but those slots — the original
-  design had flange pockets, blister pads, and exposed horns outside.
+  tangential, and **presses into a snug printed pocket** (walls grip the
+  outer 6 mm of the body on both ends and the side away from the shaft; a
+  drop of CA is optional and the tube, once installed, boxes the servos in
+  radially). Three 22 mm bodies cannot share one height in the Ø53 bore, so
+  they are **Z-staggered**: the two elevator servos sit HIGH (`tail_servo_z`,
+  opposite sides — their bodies coexist, reaching past the rim into the
+  hollow tube interior on a narrowed tower), the rudder servo sits LOW
+  (`tail_rudder_z`, arm swinging just above the motor plate). The pockets
+  stand as **columns on the motor plate** with 45°-sloped ceilings, so the
+  sleeve prints upright with zero supports. Each wire rakes outboard through
+  an **angled wall slot** aligned with its run — elevators down-aft at 42°,
+  rudder up-forward at 56°. The outer surface carries nothing but those
+  slots and the three fin-socket bosses.
 - **Wing (aileron ×2)** — the servo mounts to a dedicated **servo rib**
   (`cad/wing_rib_servo.scad`): an open-bottom bay aft of the rear spar takes
   the body, and the servo's flange seats on the rib's outboard face (CA/
@@ -61,8 +63,8 @@ and finally binds (never program past ~±60°). With the wire on the arm tip
 | step | value |
 |---|---|
 | arm tip ±45° × 10 mm | **±7.1 mm** at the wire |
-| elevators (high servos): wire raked 37° | × 0.80 → **±34.4°** |
-| rudder (low servo): wire raked 52° | × 0.62 → **±25.8°** |
+| elevators (high servos): wire raked 42° | × 0.74 → **±31.7°** |
+| rudder (low servo): wire raked 56° | × 0.56 → **±23.3°** |
 | wing: direct link, no rake | **±45°** aileron |
 | targets | elevator ±25°, rudder ±20°, aileron ±20° |
 | slot channel needed | 2 × 7.1 + 1.2 wire + 2 margin = 17.3 → **18 mm**, angled with the wire |

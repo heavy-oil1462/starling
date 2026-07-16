@@ -68,9 +68,9 @@ ctrl_horn_r      = 10;   // control-surface horn = servo horn -> 1:1 linkage
 // rudder servo sits LOW. Each wire attaches at the arm tip and exits
 // through an angled wall slot raked toward its surface horn.
 tail_servo_z           = 33; // bottom (shaft end) of the ELEVATOR servo bodies
-tail_slot_angle        = 37; // elevator rod angle off the fuselage axis
+tail_slot_angle        = 42; // elevator rod angle off the fuselage axis
 tail_rudder_z          = 9;  // bottom (shaft end) of the RUDDER servo body
-tail_rudder_slot_angle = 52; // rudder rod angle off the fuselage axis
+tail_rudder_slot_angle = 56; // rudder rod angle off the fuselage axis
 
 // --- Motor (22xx class, rear pusher) ---
 motor_shaft_hole_d = 10;
