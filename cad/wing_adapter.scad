@@ -2,10 +2,11 @@
 //   WING ADAPTER — sleeve that slides on the fuselage tube and carries the
 //   wing panels on two carbon-rod spars per side.
 //
-//   - The rod sockets go THROUGH the tabs and the sleeve wall: the rods bear
-//     on the paper tube and get the full tab as engagement (~19 mm). Bond the
-//     rods in with CA/epoxy for flight — the sockets alone are alignment, not
-//     structure.
+//   - The rod sockets run the full tab depth into the sleeve wall, stopping
+//     on a 1 mm floor at the bore (~17 mm engagement). The rods must never
+//     reach the bore: they would jam against the paper tube and block the
+//     CG slide. Bond the rods in with CA/epoxy for flight — the sockets
+//     alone are alignment, not structure.
 //   - Belly clamp: a slit plus an M3 lug pair lets the adapter be locked
 //     anywhere along the tube (movable wing = CG trim).
 // ==============================================================================
@@ -29,8 +30,9 @@ module wing_adapter() {
     z_center = adapter_length / 2;
     z_offset = spar_spacing / 2;
 
-    // Through the tab AND the sleeve wall — the rod stops on the tube itself
-    socket_depth = wing_tab_span + overlap_margin + sleeve_wall + 0.2;
+    // Full tab + wall depth, minus a 1 mm floor above the bore so the rod
+    // can never touch the paper tube
+    socket_depth = (tab_tip_x + 0.1) - (tube_radius + 1);
     screw_y = -(sleeve_outer_radius + clamp_lug_height / 2);
 
     difference() {

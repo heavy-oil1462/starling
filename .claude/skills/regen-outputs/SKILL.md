@@ -10,12 +10,14 @@ One command rebuilds everything that is committed but derived:
 ```bash
 python3 scripts/regen_all.py            # everything
 python3 scripts/regen_all.py nose tail  # just these parts
+python3 scripts/regen_all.py --stl-only # all printable STLs, skip the assembly PNG
 ```
 
 Pipeline:
 1. `scripts/check_params.py` — cross-file interface dimensions must agree (FAIL gates the commit)
-2. every part in `cad/` + `cad/calibration/` → `stl/<name>.stl`
-3. `cad/main_assembly.scad` → `main_assembly.png` (the README image)
+2. `scripts/throw_check.py` — control throw / slot length / prop clearance (FAIL gates too)
+3. every part in `cad/` + `cad/calibration/` → `stl/<name>.stl`
+4. `cad/main_assembly.scad` → `main_assembly.png` (the README image)
 
 ## Rules
 

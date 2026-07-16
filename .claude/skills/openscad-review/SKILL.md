@@ -38,6 +38,8 @@ Notes (do not rediscover):
 - **`cad/design_params.scad` is the single source of truth** for every dimension two parts share (tube OD, clearances, spar chain, tab/slot, servo/motor footprints, stations). Parts `include` it; `check_params.py` FAILS if any file re-declares one of its names. Never fix a mismatch locally — change the shared value.
 - **Wing spar chain**: rib spar holes = adapter rod sockets = carbon rods (`spar_hole_d`, `spar_spacing`, `spar_y_offset`); the root-rib window derives from `wing_tab_thickness + fit_tol`, so alignment holds by construction. Verify by rendering the assembly, not by reading numbers.
 - Sleeve bores are `tube_od + sleeve_clearance`. Fit is validated with `cad/calibration/tube_fit_ring.scad` — adjust `sleeve_clearance` in design_params, print the ring, then trust the sleeves.
+- **Controls**: servos mount internally, only the pushrod slot meets the airflow. Fin TE groove = surface LE groove (`hinge_groove_w/d`), fins shortened by `ctrl_chord + 2`, slot length gated by `scripts/throw_check.py` — run it after touching any horn/travel/hinge parameter.
+- Spar rods must never reach a sleeve bore (they'd press on the paper tube) — sockets keep a 1 mm floor.
 - The wing mount must stay movable along the tube (CG adjustment) — no feature may assume a fixed wing station.
 - Payload adapters clamp the round tube; new payload parts should reuse the sleeve interface, not invent a new mount.
 

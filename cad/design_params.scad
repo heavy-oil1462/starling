@@ -44,9 +44,22 @@ wing_station       = 300; // wing adapter position, measured from the motor face
 tail_tube_stop     = 54;  // tube bottoms out here inside the tail sleeve (rim top)
 nose_sleeve_length = 20;  // how far the nose cone slides over the tube
 
-// --- Tail servos (9 g / SG90 class) ---
+// --- Servos (9 g / SG90 class) ---
 servo_body   = [23, 12.2]; // [length, width]
 servo_flange = [32, 12.2];
+servo_height = 22;         // body height incl. shaft boss, without horn
+
+// --- Control system (internal servos, wire pushrods through wall slots) ---
+ctrl_chord       = 22;   // control-surface chord (elevator / rudder / aileron)
+ctrl_thickness   = 4;    // control-surface root thickness = fin thickness
+hinge_groove_w   = 1.6;  // groove for the hinge strip/tape, both fin TE and surface LE
+hinge_groove_d   = 2.5;
+pushrod_d        = 1.2;  // piano-wire pushrod
+pushrod_slot_w   = 2.5;  // wall slot the pushrod moves in
+pushrod_slot_len = 18;   // covers full servo travel + rod + margin (see throw_check.py)
+servo_horn_r     = 10;   // usable horn radius on a 9 g servo
+servo_travel_deg = 40;   // realistic one-sided 9 g travel at standard PWM
+ctrl_horn_r      = 8;    // control-surface horn radius
 
 // --- Motor (22xx class, rear pusher) ---
 motor_shaft_hole_d = 10;

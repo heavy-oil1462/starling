@@ -23,8 +23,9 @@ Open-source, cheap, quick-to-build RC plane: a paper-tube fuselage (50 mm-class 
 
 Everything runs headless through nix — **never download or manually install binaries** (`nix shell` / `nix build` only). OpenSCAD comes from `nixpkgs#openscad-unstable`.
 
-- `python3 scripts/regen_all.py` — the single entry point for derived artifacts: param check → all STLs → `main_assembly.png`. Run after ANY .scad change (see the `regen-outputs` skill).
+- `python3 scripts/regen_all.py` — the single entry point for derived artifacts: gates (params, throw) → all STLs → `main_assembly.png`. Run after ANY .scad change (see the `regen-outputs` skill). `--stl-only` exports just the printable STLs.
 - `python3 scripts/check_params.py` — cross-file interface-dimension check; `[FAIL]` means parts won't fit the same tube. Gate every commit on it.
+- `python3 scripts/throw_check.py` — control-surface throw, pushrod-slot length, and pusher-prop clearance from the shared params (via `scripts/design_params.py`, the Python-side parser of `design_params.scad`).
 - `python3 scripts/render_scad.py <file.scad> <out.png|stl> [openscad args]` — one-off headless renders (see the `openscad-review` skill).
 
 Conventions:
@@ -37,5 +38,6 @@ Conventions:
 
 - Fuselage: ~53 mm OD paper/postal tube (calibrate with `cad/calibration/tube_fit_ring.scad` before trusting any sleeve fit)
 - Wing spars: 6 mm carbon rods (6.2 mm printed holes)
-- Servos: 9 g class (SG90 footprint), pocketed into the tail sleeve wall
+- Servos: 9 g class (SG90 footprint), all mounted INTERNALLY — tail servos on pads inside the sleeve, aileron servos clipped to the spars inside the wing; wire pushrods exit through small slots (drag rule: nothing but the slot meets the airflow). Throw/slot/clearance numbers: `scripts/throw_check.py`, rationale in `docs/control-system.md`.
+- Pushrods: 1.2 mm piano wire; control surfaces hinge on a tape/PP strip glued into matching grooves (never a printed living hinge)
 - Motor: 16×19 mm screw pattern (22xx class), rear-mounted (pusher)

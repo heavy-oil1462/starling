@@ -14,6 +14,9 @@ second volume or errors out is a finding, not something to ignore.
 
 Usage:
     scripts/regen_all.py [part ...]    # no args = everything
+    scripts/regen_all.py --stl-only    # export the printable STLs, skip the
+                                       # assembly PNG (the "give me everything
+                                       # to print" mode)
 """
 
 import re
@@ -26,8 +29,8 @@ from render_scad import render
 ROOT = Path(__file__).resolve().parent.parent
 PARTS_DIRS = [ROOT / "cad", ROOT / "cad" / "calibration"]
 # Not printable parts: the assembly renders to PNG, design_params is data,
-# and the fuselage is the bought paper tube (visual model only).
-NON_PARTS = {"main_assembly", "design_params", "fuselage"}
+# and fuselage (paper tube) / servo_9g (bought servo) are visual models only.
+NON_PARTS = {"main_assembly", "design_params", "fuselage", "servo_9g"}
 
 
 def parts():
@@ -53,17 +56,20 @@ def run_one(scad: Path, out: Path) -> bool:
 
 
 def main(argv):
-    check = subprocess.run([sys.executable, str(ROOT / "scripts" / "check_params.py")])
-    ok = check.returncode == 0
+    stl_only = "--stl-only" in argv
+    only = {a for a in argv[1:] if not a.startswith("--")}
 
-    only = set(argv[1:])
+    ok = True
+    for gate in ("check_params.py", "throw_check.py"):
+        ok &= subprocess.run([sys.executable, str(ROOT / "scripts" / gate)]).returncode == 0
+
     (ROOT / "stl").mkdir(exist_ok=True)
     for scad in parts():
         if only and scad.stem not in only:
             continue
         ok &= run_one(scad, ROOT / "stl" / f"{scad.stem}.stl")
 
-    if not only or "main_assembly" in only:
+    if not stl_only and (not only or "main_assembly" in only):
         ok &= run_one(ROOT / "cad" / "main_assembly.scad", ROOT / "main_assembly.png")
 
     return 0 if ok else 1

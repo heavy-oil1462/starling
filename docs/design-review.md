@@ -20,7 +20,7 @@ Reviewed by rendering every part headlessly (`scripts/regen_all.py`) and inspect
 ## Structural concerns
 
 5. **Wing spar engagement was 10 mm of blind socket in a printed tab.**
-   **Improved:** sockets now run through the tab *and* the sleeve wall (~19 mm engagement, rod bears on the tube itself), and `wing_adapter.scad` documents that rods must be bonded in for flight — sockets are alignment, not structure. A continuous over/under-tube spar remains the upgrade path if flight testing shows the joint working loose.
+   **Improved:** sockets now run through the tab and deep into the sleeve wall, stopping on a 1 mm floor at the bore (~17 mm engagement — a first through-wall version let the rod poke into the bore and press on the paper tube, which would have blocked the CG slide; caught and fixed). `wing_adapter.scad` documents that rods must be bonded in for flight — sockets are alignment, not structure. A continuous over/under-tube spar remains the upgrade path if flight testing shows the joint working loose.
 
 6. **The wing adapter had no clamp** (CG-trim slide was friction-only at the highest-load joint).
    **Fixed:** belly slit + M3 lug pair (two screws) so the adapter locks anywhere along the tube. Nose and tail sleeves stay friction/tape fits — they carry far smaller loads and tape suits the expendable philosophy.
@@ -29,7 +29,7 @@ Reviewed by rendering every part headlessly (`scripts/regen_all.py`) and inspect
    **Documented as intent:** the TE slit is a *groove for a taped/glued-in hinge* (foam or hinge strip), not a printed living hinge — stated in `tail.scad` where the slit parameters live.
 
 8. **Pusher prop vs control surfaces**: the prop disc sits immediately behind the fin trailing edges.
-   **Documented as a build rule** in `tail.scad`'s motor-mount section: use a prop standoff at least as long as the control-surface chord, or keep the prop radius clear of the surfaces at full deflection. (Not resolvable in CAD until a motor/prop combo is chosen.)
+   **Resolved by geometry + gated:** the fins are now shortened by `ctrl_chord + 2`, so the control surfaces live in that gap and their TE sits 2 mm *forward* of the motor face at neutral — deflection only increases the clearance. `scripts/throw_check.py` (run by `regen_all.py`) documents the residual rule: keep ≥5 mm between motor face and prop disc. Full analysis: `docs/control-system.md`.
 
 ## Geometry / code health
 

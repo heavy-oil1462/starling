@@ -26,13 +26,12 @@ rim_z_position      = tail_tube_stop - rim_height;
 
 // --- Fin Dimensions ---
 fin_thickness       = 4;
-fin_servo_gap       = 0;               // Gap for control surfaces
+fin_servo_gap       = ctrl_chord + 2;  // fins end here; control surfaces fill the gap
 fin_inset           = 1;               // Depth fins penetrate into body
-// TE hinge groove: a slot for taping/gluing in the control-surface hinge
-// (foam or hinge strip). NOT a living hinge — printed living hinges crack
-// after a few dozen cycles.
-hinge_slit_thickness = 1.5;
-hinge_slit_depth    = 2;
+// TE hinge groove: matches the LE groove of control_surface.scad — a
+// flexible strip (fiber tape / 0.5 mm PP) glues into both grooves and IS
+// the hinge. NOT a printed living hinge — those crack within dozens of
+// cycles. Groove size comes from design_params (hinge_groove_w/d).
 
 // Vertical Fin (Rudder)
 vertical_fin_height = 80;
@@ -53,24 +52,25 @@ horizontal_fin_sweep = 5;
 motor_wire_hole_dia  = 10;
 motor_mount_screw_hole_depth = motor_mount_solid_length + 0.2;
 
-// --- Servo & Cutout Configuration (footprint comes from design_params) ---
-servo_body_dims_plate   = servo_body;   // [Length Z, Width Tangential]
-servo_flange_dims_plate = servo_flange;
+// --- Servo Mounting (INTERNAL — servos live inside the sleeve) ---
+// The servos sit against the inner wall on shallow locating pads, lying on
+// their sides so the output shaft points tangentially: the horn swings in
+// the radial/axial plane and drives a wire pushrod RADIALLY out through a
+// small slot in the wall to the control horn — nothing but a 2.5 mm slot
+// disturbs the outer surface (the old external blister + exposed linkage
+// is gone). Install through the open front end before the tube goes in
+// (the tube stops at the internal rim, above the servo bay).
+// Throw numbers: scripts/throw_check.py.
 
-servo_body_length   = servo_body_dims_plate[0];
-servo_body_width    = servo_body_dims_plate[1];
-servo_flange_length = servo_flange_dims_plate[0];
-servo_flange_width  = servo_flange_dims_plate[1];
-
+servo_body_length   = servo_body[0];
 tol                 = fit_tol;         // Printing tolerance (shared)
 epsilon             = 1;               // Cut overlap
-pushrod_offset      = 6;               // Offset from fin centerline
-blister_pad_thickness = 2;             // External protrusion for servo mount
-servo_flange_pocket_depth = 2;         // Depth of pocket in wall
+pushrod_offset      = ctrl_horn_r + 2; // pushrod plane, offset from fin centerline
+servo_bay_z_start   = motor_mount_solid_length + 1;
 
-// Distance from the Motor Mount Face (Z=0) to the START of the servo bay
-servo_dist_from_mount = 0; 
-servo_bay_z_start   = motor_mount_solid_length + servo_dist_from_mount;
+// The control horn sits just inboard of the hinge line; the pushrod plane
+// and slot center on it
+pushrod_z           = fin_servo_gap - 2;
 
 // ==============================================================================
 //   MAIN RENDER
@@ -122,14 +122,12 @@ module tail_assembly() {
             }
         }
         
-        // 1. Right Fin (Rotated 0, offset "down" in Y)
-        servo_cutout_pocket(rotation_angle = 0, offset_y = -(pushrod_offset + servo_flange_width));
-        
-        // 2. Left Fin (Rotated 180, offset "down" relative to fin)
-        servo_cutout_pocket(rotation_angle = 180, offset_y = pushrod_offset);
-
-        // 3. Top Fin (Rotated 90, offset "left" relative to fin)
-        servo_cutout_pocket(rotation_angle = 90, offset_y = -(pushrod_offset + servo_flange_width));
+        // Pushrod slots through the wall, one per control surface. The
+        // horizontal-fin rods run on the belly side, the rudder rod on the
+        // right side — mirrors where the surface horns hang.
+        pushrod_slot(rotation_angle = 0,   offset_y = -pushrod_offset);
+        pushrod_slot(rotation_angle = 180, offset_y = pushrod_offset);
+        pushrod_slot(rotation_angle = 90,  offset_y = -pushrod_offset);
     }
 }
 
@@ -147,6 +145,12 @@ module fuselage_sleeve() {
                 cylinder(rim_height + 0.2, r = tube_radius - rim_thickness);
         }
 
+    // Internal servo locating pads (also after the difference — they live
+    // inside the bore), one per control surface, same angles as the slots
+    servo_pad(rotation_angle = 0);
+    servo_pad(rotation_angle = 180);
+    servo_pad(rotation_angle = 90);
+
     difference() {
         // --- Solids ---
         union() {
@@ -158,10 +162,7 @@ module fuselage_sleeve() {
             rotate_extrude(convexity = 10)
                 translate([outer_radius - sleeve_fillet_radius, 0, 0])
                 circle(r = sleeve_fillet_radius, $fn=30);
- 
-            servo_mount_boss(rotation_angle = 0, offset_y = -(pushrod_offset + servo_flange_width));
-            servo_mount_boss(rotation_angle = 180, offset_y = pushrod_offset);
-            servo_mount_boss(rotation_angle = 90, offset_y = -(pushrod_offset+servo_flange_width));
+
         }
         
         // --- Cutouts ---
@@ -203,8 +204,8 @@ module construct_fin_with_hinge(root, tip, span, sweep) {
     slit_y_start_bottom = hinge_cap_length; 
     slit_y_start_top    = slit_length + hinge_cap_length*2; 
     
-    // Hinge Slit Cutter X-position (remains the same)
-    x_pos = -(root - fin_servo_gap) - hinge_slit_depth;
+    // Hinge groove cutter X-position (at the shortened TE)
+    x_pos = -(root - fin_servo_gap) - hinge_groove_d;
     
     difference() {
         // Base Fin Shape
@@ -221,24 +222,24 @@ module construct_fin_with_hinge(root, tip, span, sweep) {
             translate([
                 x_pos, 
                 slit_y_start_bottom - epsilon, // -epsilon ensures the cut starts before the fin material
-                -hinge_slit_thickness / 2 
+                -hinge_groove_w / 2 
             ])
             cube([
-                hinge_slit_depth + epsilon + 1, // X-depth
+                hinge_groove_d + epsilon + 1, // X-depth
                 slit_length + epsilon, // Y-length
-                hinge_slit_thickness // Z-thickness
+                hinge_groove_w // Z-thickness
             ]);
 
             // 2. Top Slit Cutter (from Y=slit_length + cap up to Y=span)
             translate([
                 x_pos, 
                 slit_y_start_top, // Start Y after the 10mm cap
-                -hinge_slit_thickness / 2 
+                -hinge_groove_w / 2 
             ])
             cube([
-                hinge_slit_depth + epsilon + 1, // X-depth
+                hinge_groove_d + epsilon + 1, // X-depth
                 slit_length + epsilon, // Y-length
-                hinge_slit_thickness // Z-thickness
+                hinge_groove_w // Z-thickness
             ]);
         }
     }
@@ -272,78 +273,44 @@ module fin_airfoil_profile(chord, thickness) {
 }
 
 // ==============================================================================
-//   SERVO MOUNT MODULES
+//   INTERNAL SERVO MOUNT MODULES
 // ==============================================================================
 
-module servo_mount_boss(rotation_angle = 0, offset_y = 0) {
-    frame_width = 4; 
-    frame_thickness = 3;
-    
-    flange_width_tol = servo_flange_width + tol;
-    y_start = offset_y;
-    y_end = offset_y + flange_width_tol;
-    max_tangential_offset = max(abs(y_start), abs(y_end));
-    
-    min_inner_radius_at_edge = sqrt(max(0, pow(tube_radius, 2) - pow(max_tangential_offset, 2)));
-    cutter_start_radius = min_inner_radius_at_edge - epsilon; 
+// Shallow pad against the inner wall with a locating recess for the servo's
+// side face (servo lies on its side, shaft tangential, glued/taped in). The
+// recess is placed so the horn plane lands on the pushrod plane (offset
+// -pushrod_offset from the fin centerline in this rotated frame).
+module servo_pad(rotation_angle = 0) {
+    recess_y0 = -pushrod_offset + 0.5;                    // horn side
+    recess_w  = servo_height + tol;
+    pad_y0    = recess_y0 - 3;
+    pad_y1    = recess_y0 + recess_w + 3;
+    pad_z0    = servo_bay_z_start - 3;
+    pad_l     = servo_body_length + tol + 6;
+    // Flat mounting face, inboard of the wall at the pad's widest edge
+    face_x    = sqrt(pow(tube_radius, 2) - pow(max(abs(pad_y0), abs(pad_y1)), 2)) - 0.5;
 
-    flange_length_tol = servo_flange_length + tol;
-    // Position relative to Z=0
-    cutout_z_pos_flange = servo_bay_z_start;
-    
-    y_pos_pocket = offset_y;
-
-    radial_start_pos = cutter_start_radius - frame_thickness;
-    radial_end_pos = outer_radius + blister_pad_thickness;
-    radial_depth = radial_end_pos - radial_start_pos;
-    
-    y_start_pos = y_pos_pocket - frame_width;
-    y_width = flange_width_tol + (2 * frame_width);
-    
-    z_start_pos = cutout_z_pos_flange - frame_width;
-    z_length = flange_length_tol + (2 * frame_width);
-    
-    rotate([0, 0, rotation_angle]) {
-        translate([radial_start_pos, y_start_pos, z_start_pos])
-        cube([radial_depth, y_width, z_length]);
-    }
+    rotate([0, 0, rotation_angle])
+        difference() {
+            // Solid between the flat face and the bore wall (buried 0.5)
+            intersection() {
+                translate([face_x, pad_y0, pad_z0])
+                    cube([tube_radius, pad_y1 - pad_y0, pad_l]);
+                translate([0, 0, pad_z0])
+                    cylinder(pad_l, r = tube_radius + 0.5);
+            }
+            // Locating recess = servo side profile, 1.2 deep
+            translate([face_x - 0.1, recess_y0, servo_bay_z_start])
+                cube([1.3, recess_w, servo_body_length + tol]);
+        }
 }
 
-module servo_cutout_pocket(rotation_angle = 0, offset_y = 0) {
-    flange_width_tol = servo_flange_width + tol;
-    body_width_tol = servo_body_width + tol;
-    
-    y_start = offset_y;
-    y_end = offset_y + flange_width_tol;
-    max_tangential_offset = max(abs(y_start), abs(y_end));
-    
-    min_inner_radius_at_edge = sqrt(max(0, pow(tube_radius, 2) - pow(max_tangential_offset, 2)));
-    
-    cutter_start_radius = min_inner_radius_at_edge - epsilon;
-    cutter_end_radius = outer_radius + blister_pad_thickness + epsilon;
-    cutter_radial_depth = cutter_end_radius - cutter_start_radius;
-
-    flange_cutter_radial_depth = (tube_radius + servo_flange_pocket_depth) - cutter_start_radius;
-
-    flange_length_tol = servo_flange_length + tol;
-    body_length_tol = servo_body_length + tol;
-    
-    // Position relative to Z=0
-    cutout_z_pos_flange = servo_bay_z_start;
-    cutout_z_pos_body = cutout_z_pos_flange + (flange_length_tol - body_length_tol) / 2;
-    
-    y_pos_pocket = offset_y;
-    y_pos_body = offset_y + (flange_width_tol - body_width_tol) / 2;
-
-    rotate([0, 0, rotation_angle]) {
-        union() {
-            // 1. Flange Pocket (Shallow)
-            translate([cutter_start_radius, y_pos_pocket, cutout_z_pos_flange])
-            cube([flange_cutter_radial_depth, flange_width_tol, flange_length_tol]);
-            
-            // 2. Body Hole (Deep)
-            translate([cutter_start_radius, y_pos_body, cutout_z_pos_body])
-            cube([cutter_radial_depth, body_width_tol, body_length_tol]);
-        }
-    }
+// Slot for the wire pushrod: cuts the servo pad and the wall so the rod can
+// run radially from the horn (inside) to the control horn (outside) and
+// sweep along Z through the full servo travel. Length sized by
+// scripts/throw_check.py.
+module pushrod_slot(rotation_angle = 0, offset_y = 0) {
+    rotate([0, 0, rotation_angle])
+        translate([tube_radius - 9, offset_y - pushrod_slot_w / 2, pushrod_z - pushrod_slot_len / 2])
+            cube([9 + sleeve_wall + 2, pushrod_slot_w, pushrod_slot_len]);
 }

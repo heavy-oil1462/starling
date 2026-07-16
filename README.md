@@ -20,8 +20,12 @@
 | Nose cone | `cad/nose.scad` | Sleeve-mounted, angled FPV camera opening |
 | Wing adapter | `cad/wing_adapter.scad` | Slides on the tube, M3 belly clamp; through-sockets for the wing spars |
 | Wing ribs | `cad/wing_rib.scad`, `cad/wing_rib_root.scad` | NACA airfoil ribs on 6 mm carbon spars, foam-board skin; the root rib slides over the adapter tab |
-| Tail | `cad/tail.scad` | One print: sleeve + fins with living hinges, 3 servo pockets, rear motor mount (pusher) |
+| Tail | `cad/tail.scad` | One print: sleeve + fins, internal servo pads, pushrod wall slots, rear motor mount (pusher) |
+| Control surfaces | `cad/control_surface.scad` | One part, three spans (elevator/rudder/aileron); tape-strip hinge in matching grooves |
+| Wing servo mount | `cad/wing_servo_mount.scad` | Clips onto both spars near the tube; servo hides inside the wing, wire runs to the aileron |
 | Calibration prints | `cad/calibration/` | Tube fit ring, motor screw pattern, servo pocket — print these first |
+
+All servos mount internally — nothing but a 2.5 mm wire slot meets the airflow. Throw analysis (±53° mechanical vs ±25° targets): `docs/control-system.md` and `scripts/throw_check.py`.
 
 Print-ready STLs for every part are committed under `stl/`.
 
@@ -30,8 +34,10 @@ Print-ready STLs for every part are committed under `stl/`.
 Tooling is Python + OpenSCAD, fully headless, fetched via nix (no manual installs):
 
 ```bash
-python3 scripts/regen_all.py      # param check + rebuild every STL + assembly render
-python3 scripts/check_params.py   # do the parts still fit the same tube?
+python3 scripts/regen_all.py            # gates + rebuild every STL + assembly render
+python3 scripts/regen_all.py --stl-only # export everything printable to stl/
+python3 scripts/check_params.py         # do the parts still fit the same tube?
+python3 scripts/throw_check.py          # control-surface throw / slot / clearance check
 python3 scripts/render_scad.py cad/nose.scad nose.png   # one-off render
 ```
 
