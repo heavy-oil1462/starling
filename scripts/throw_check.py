@@ -9,15 +9,17 @@ Linkage model (see docs/control-system.md):
   sweep ~180 deg total, but the linkage is only near-linear while the arm
   stays within ~+/-45 deg of perpendicular-to-the-wire — that usable window
   is servo_travel_deg.
-- Tail: the servo sits high in the sleeve and the wire rakes down/outboard
-  at tail_slot_angle off the fuselage axis. The surface horn's eye travels
-  along the fuselage axis, so only cos(tail_slot_angle) of the wire motion
-  becomes horn motion.
+- Tail: the servos are Z-staggered (three bodies can't share one height in
+  the bore). Elevator servos sit high, their wires raking down/outboard at
+  tail_slot_angle; the rudder servo sits low, its wire raking up/outboard
+  at tail_rudder_slot_angle. The surface horn's eye travels along the
+  fuselage axis, so only cos(rake) of the wire motion becomes horn motion.
 - Wing: the aileron sits directly behind its servo, linked by a short wire
   above the wing — rake ~0, full transfer.
 
-Targets (docile payload hauler): elevator/rudder >= 25 deg, aileron >= 20 deg
-each way. Exit 1 on any failure — regen_all.py runs this as a gate.
+Targets (docile payload hauler): elevator >= 25 deg, aileron >= 20 deg, and
+rudder >= 20 deg (with ailerons fitted the rudder only coordinates turns).
+Exit 1 on any failure — regen_all.py runs this as a gate.
 """
 
 import math
@@ -37,14 +39,13 @@ def main():
     horn_r = P["servo_horn_r"]
     ctrl_r = P["ctrl_horn_r"]
     travel = P["servo_travel_deg"]
-    rake = P["tail_slot_angle"]
 
     linear = horn_r * math.sin(math.radians(travel))
     print(f"arm tip: {horn_r} mm x +/-{travel} deg (of ~180 total) -> +/-{linear:.1f} mm at the wire")
 
     cases = {
-        "elevator": (math.cos(math.radians(rake)), 25),
-        "rudder":   (math.cos(math.radians(rake)), 25),
+        "elevator": (math.cos(math.radians(P["tail_slot_angle"])), 25),
+        "rudder":   (math.cos(math.radians(P["tail_rudder_slot_angle"])), 20),
         "aileron":  (1.0, 20),
     }
     ok = True
@@ -52,7 +53,7 @@ def main():
         deflection = surface_throw(linear, transfer, ctrl_r)
         good = deflection >= target
         ok &= good
-        note = f"rake {rake} deg -> x{transfer:.2f}" if transfer < 1 else "direct link"
+        note = f"rake -> x{transfer:.2f}" if transfer < 1 else "direct link"
         print(f"[{'ok' if good else 'FAIL'}] {surface}: +/-{deflection:.1f} deg available "
               f"({note}) vs +/-{target} deg target")
 

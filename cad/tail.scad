@@ -52,17 +52,18 @@ horizontal_fin_sweep = 5;
 motor_wire_hole_dia  = 10;
 motor_mount_screw_hole_depth = motor_mount_solid_length + 0.2;
 
-// --- Servo Mounting (INTERNAL — servos live HIGH inside the sleeve) ---
-// The servos sit against the inner wall on shallow locating pads, lying on
-// their sides so the output shaft points tangentially and the full-length
-// arm swings in the radial/axial plane. They mount high (shaft end at
-// tail_servo_z, body up toward the rim) so the wire, attached at the ARM
-// TIP, rakes down and outboard at ~tail_slot_angle through an ANGLED wall
-// slot to the control-surface horn — the arm is perpendicular to the wire
-// at neutral, and nothing but a 2.5 mm slot disturbs the outer surface.
-// Install through the open front end before the tube goes in (the tube
-// stops at the internal rim; the pads end below it).
-// Throw and rake numbers: scripts/throw_check.py.
+// --- Servo Mounting (INTERNAL, push-fit, Z-STAGGERED) ---
+// The servos press into snug pockets on the inner wall, lying on their
+// sides so the output shaft points tangentially and the full-length arm
+// swings in the radial/axial plane. Three 22 mm bodies cannot share one
+// height in the bore, so the ELEVATOR servos sit HIGH (opposite sides,
+// bodies from tail_servo_z up past the rim into the hollow tube interior)
+// and the RUDDER servo sits LOW (from tail_rudder_z, arm swinging just
+// above the motor plate). Each wire attaches at the ARM TIP — arm
+// perpendicular to the wire at neutral — and exits through an ANGLED wall
+// slot raked toward its surface horn; the elevator rods run outboard-aft,
+// the rudder rod outboard-forward. Install through the open front end
+// before the tube goes in. Throw and rake numbers: scripts/throw_check.py.
 
 servo_body_length   = servo_body[0];
 tol                 = fit_tol;         // Printing tolerance (shared)
@@ -122,11 +123,14 @@ module tail_assembly() {
         // Pushrod slots through the wall, one per control surface. Both
         // elevator linkages live on the BELLY side; the left one is a true
         // MIRROR of the right (a plain rotate would flip its horn to the
-        // top while the slot stayed low). Rudder linkage on the right side.
+        // top while the slot stayed low). Rudder linkage on the right side,
+        // raked the other way because its servo sits LOW.
         pushrod_slot(rotation_angle = 0, offset_y = -pushrod_offset);
         mirror([1, 0, 0])
             pushrod_slot(rotation_angle = 0, offset_y = -pushrod_offset);
-        pushrod_slot(rotation_angle = 90, offset_y = -pushrod_offset);
+        pushrod_slot(rotation_angle = 90, offset_y = -pushrod_offset,
+                     z_center = tail_rudder_z + 3.3,
+                     tilt = -(90 - tail_rudder_slot_angle));
     }
 }
 
@@ -144,12 +148,13 @@ module fuselage_sleeve() {
                 cylinder(rim_height + 0.2, r = tube_radius - rim_thickness);
         }
 
-    // Internal servo locating pads (also after the difference — they live
-    // inside the bore), one per control surface, matching the slots: the
-    // left elevator pad is the mirror of the right one
-    servo_pad(rotation_angle = 0);
-    mirror([1, 0, 0]) servo_pad(rotation_angle = 0);
-    servo_pad(rotation_angle = 90);
+    // Internal push-fit servo pockets (also after the difference — they
+    // live inside the bore), one per control surface, matching the slots.
+    // The left elevator pocket is the mirror of the right one; the rudder
+    // pocket sits LOW so the three servo bodies never share a height.
+    servo_pad(rotation_angle = 0, z0 = tail_servo_z);
+    mirror([1, 0, 0]) servo_pad(rotation_angle = 0, z0 = tail_servo_z);
+    servo_pad(rotation_angle = 90, z0 = tail_rudder_z);
 
     difference() {
         // --- Solids ---
@@ -276,42 +281,50 @@ module fin_airfoil_profile(chord, thickness) {
 //   INTERNAL SERVO MOUNT MODULES
 // ==============================================================================
 
-// Shallow pad against the inner wall with a locating recess for the servo's
-// side face (servo lies on its side, shaft tangential, glued/taped in). The
-// recess is placed so the horn plane lands on the pushrod plane (offset
-// -pushrod_offset from the fin centerline in this rotated frame).
-module servo_pad(rotation_angle = 0) {
-    recess_y0 = -pushrod_offset - 0.5;                    // arm side
-    recess_w  = servo_height + tol;
-    pad_y0    = recess_y0 - 3;
-    pad_y1    = recess_y0 + recess_w + 3;
-    pad_z0    = tail_servo_z - 3;
-    pad_l     = tail_tube_stop - pad_z0;   // capped below the tube stop
-    // Flat mounting face, inboard of the wall at the pad's widest edge
-    face_x    = sqrt(pow(tube_radius, 2) - pow(max(abs(pad_y0), abs(pad_y1)), 2)) - 0.5;
+// PUSH-FIT pocket against the inner wall: the servo (side-lying, shaft
+// tangential) presses radially into a snug pocket whose walls grip the
+// outer 6 mm of the body on three sides — both Z ends and the side away
+// from the shaft. The shaft/arm side stays open so the arm and wire can
+// swing. Drop of CA optional; the tube (installed later) also boxes the
+// servos in radially. z0 = bottom (shaft end) of the servo body.
+module servo_pad(rotation_angle = 0, z0 = tail_servo_z) {
+    grip = 6;      // radial depth of the pocket walls
+    wall = 2.5;
+    snug = 0.15;   // press-fit allowance (tighter than fit_tol)
+
+    p_l    = servo_body_length + snug;         // pocket along Z
+    p_w    = servo_height + snug;              // pocket tangential
+    y0     = -pushrod_offset - 0.5;            // shaft/arm end (open side)
+    pad_y1 = y0 + p_w + wall;
+    pad_z0 = z0 - wall;
+    pad_l  = min(p_l + 2 * wall, tail_tube_stop - pad_z0); // capped at the tube stop
+    // Pocket floor sits just inboard of the wall at the pad's widest edge
+    floor_x = sqrt(pow(tube_radius, 2) - pow(max(abs(y0), abs(pad_y1)), 2)) - 1;
 
     rotate([0, 0, rotation_angle])
         difference() {
-            // Solid between the flat face and the bore wall (buried 0.5)
+            // Solid between the pocket walls and the bore wall (buried 0.5)
             intersection() {
-                translate([face_x, pad_y0, pad_z0])
-                    cube([tube_radius, pad_y1 - pad_y0, pad_l]);
+                translate([floor_x - grip, y0, pad_z0])
+                    cube([tube_radius, pad_y1 - y0, pad_l]);
                 translate([0, 0, pad_z0])
                     cylinder(pad_l, r = tube_radius + 0.5);
             }
-            // Locating recess = servo side profile, 1.2 deep
-            translate([face_x - 0.1, recess_y0, tail_servo_z])
-                cube([1.3, recess_w, servo_body_length + tol]);
+            // The pocket: open radially inward and toward the shaft side
+            translate([floor_x - grip - 0.1, y0 - 5, z0])
+                cube([grip + 0.1, p_w + 5, p_l]);
         }
 }
 
 // ANGLED slot for the wire pushrod: a channel through the pad and the wall,
-// aligned with the rod's raked path (tail_slot_angle off the fuselage axis)
-// from the arm tip down/outboard to the control horn. Channel length =
-// pushrod_slot_len; the extra Z-height gives the wire room to sweep.
-module pushrod_slot(rotation_angle = 0, offset_y = 0) {
+// aligned with the rod's raked path from the arm tip to the control horn.
+// z_center = where the rod crosses the wall; tilt = signed rotation of the
+// channel off the fuselage axis (+ = rod runs outboard-AFT like the
+// elevators, - = outboard-FORWARD like the low rudder servo's rod).
+module pushrod_slot(rotation_angle = 0, offset_y = 0,
+                    z_center = tail_servo_z + 6, tilt = 90 - tail_slot_angle) {
     rotate([0, 0, rotation_angle])
-        translate([tube_radius + 1.5, offset_y, tail_servo_z + 6])
-            rotate([0, 90 - tail_slot_angle, 0])
+        translate([tube_radius + 1.5, offset_y, z_center])
+            rotate([0, tilt, 0])
                 cube([pushrod_slot_len, pushrod_slot_w, 9], center = true);
 }

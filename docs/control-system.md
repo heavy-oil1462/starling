@@ -13,17 +13,18 @@ The wire always attaches at the **tip of the full-length servo arm**, and at
 neutral the arm sits **perpendicular to the wire** — that is where the
 linkage is most linear and transmits the most motion.
 
-- **Tail (elevator ×2, rudder ×1)** — each servo lies on its side on a printed
-  locating pad against the inner sleeve wall (glued/taped, installed through
-  the open front before the tube goes in; the pads end below the internal
-  rim, so the tube never touches them). The servos mount HIGH in the sleeve
-  (`tail_servo_z`), shaft tangential, and the wire rakes down and outboard
-  at `tail_slot_angle` (42°) through an **angled wall slot** to the surface
-  horn — the slot channel is aligned with the wire so it exits at the
-  correct angle toward the control surface. The outer surface carries
-  nothing but that slot — the previous design had a flange pocket, blister
-  pad, and exposed horn+rod on the outside of a Ø59 mm body; this removes
-  all of it.
+- **Tail (elevator ×2, rudder ×1)** — each servo lies on its side, shaft
+  tangential, and **presses into a snug printed pocket** on the inner sleeve
+  wall (walls grip the outer 6 mm of the body on three sides, open toward
+  the shaft so the arm can swing; a drop of CA is optional and the tube,
+  once installed, boxes the servos in radially). Three 22 mm bodies cannot
+  share one height in the Ø53 bore, so they are **Z-staggered**: the two
+  elevator servos sit HIGH (`tail_servo_z`, opposite sides — their bodies
+  coexist), the rudder servo sits LOW (`tail_rudder_z`, arm swinging just
+  above the motor plate). Each wire rakes outboard through an **angled wall
+  slot** aligned with its run — elevators down-aft at 37°, rudder up-forward
+  at 52°. The outer surface carries nothing but those slots — the original
+  design had flange pockets, blister pads, and exposed horns outside.
 - **Wing (aileron ×2)** — the servo mounts to a dedicated **servo rib**
   (`cad/wing_rib_servo.scad`): an open-bottom bay aft of the rear spar takes
   the body, and the servo's flange seats on the rib's outboard face (CA/
@@ -60,18 +61,20 @@ and finally binds (never program past ~±60°). With the wire on the arm tip
 | step | value |
 |---|---|
 | arm tip ±45° × 10 mm | **±7.1 mm** at the wire |
-| tail: wire raked 42° off the horn's travel direction | × 0.74 → **±31.7°** elevator/rudder |
+| elevators (high servos): wire raked 37° | × 0.80 → **±34.4°** |
+| rudder (low servo): wire raked 52° | × 0.62 → **±25.8°** |
 | wing: direct link, no rake | **±45°** aileron |
-| targets | elevator/rudder ±25°, aileron ±20° |
+| targets | elevator ±25°, rudder ±20°, aileron ±20° |
 | slot channel needed | 2 × 7.1 + 1.2 wire + 2 margin = 17.3 → **18 mm**, angled with the wire |
 
-The rake factor is the price of keeping the tail servos inside the tube —
-cos(42°) of the wire motion becomes horn motion — and the margins still
-clear the targets. Trim the excess with transmitter endpoints/expo (or
-ArduPilot SERVOx limits), which also softens 9 g centering slop. If a
-surface ever needs more authority, enlarge the *control* horn only as a
-last resort (it grows the exposed horn); first reduce the rake by moving
-the servo higher (`tail_servo_z`).
+The rake factor is the price of keeping the servos inside the tube —
+cos(rake) of the wire motion becomes horn motion. The rudder pays the most
+because its low, staggered position stretches the radial run, which is fine:
+with ailerons fitted the rudder only coordinates turns (hence its ±20°
+target). Trim the excess with transmitter endpoints/expo (or ArduPilot
+SERVOx limits), which also softens 9 g centering slop. The rudder arm dips
+to z≈5 at full ±45° — 1 mm above the motor plate — so never program it past
+±40°.
 
 **Prop clearance (pusher):** at neutral the tail surfaces' TE sits 2 mm
 forward of the motor face; deflection only rotates the TE *away* from it.

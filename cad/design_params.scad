@@ -62,10 +62,15 @@ servo_travel_deg = 45;   // used one-sided travel; the arm can do ~±90 (180 tot
                          // but the linkage stays near-linear only within ±45
 ctrl_horn_r      = 10;   // control-surface horn = servo horn -> 1:1 linkage
 
-// Tail linkage geometry: servos sit HIGH in the tail sleeve and the wire
-// rakes down/outboard through an ANGLED wall slot to the surface horn.
-tail_servo_z    = 30;    // aft (shaft) end of the tail servo bodies
-tail_slot_angle = 42;    // rod angle off the fuselage axis, in the radial plane
+// Tail linkage geometry. Three 22 mm-wide servos cannot share one height
+// inside the Ø53 bore (corner collisions), so they are STAGGERED in Z:
+// the two elevator servos sit HIGH (opposite sides, they coexist), the
+// rudder servo sits LOW. Each wire attaches at the arm tip and exits
+// through an angled wall slot raked toward its surface horn.
+tail_servo_z           = 33; // bottom (shaft end) of the ELEVATOR servo bodies
+tail_slot_angle        = 37; // elevator rod angle off the fuselage axis
+tail_rudder_z          = 9;  // bottom (shaft end) of the RUDDER servo body
+tail_rudder_slot_angle = 52; // rudder rod angle off the fuselage axis
 
 // --- Motor (22xx class, rear pusher) ---
 motor_shaft_hole_d = 10;

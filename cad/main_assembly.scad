@@ -47,25 +47,27 @@ color("Tomato")
 color("SteelBlue") translate([0, 0, wing_station]) wing_adapter();
 
 // ------------------------------------------------------------------------------
-// Tail controls: one block per surface, rotated to its fin. Servo sits HIGH
-// on its internal pad, shaft (aft end) at tail_servo_z + 6; the wire attaches
-// at the ARM TIP — perpendicular to the wire at neutral — and rakes down/
-// outboard through the angled wall slot to the surface horn.
+// Tail controls: one block per surface. Servos press into their internal
+// pockets, Z-STAGGERED — elevators high (arms up-outboard, wires raking
+// down-aft), rudder low (arm down-outboard, wire raking up-forward). Every
+// wire attaches at the ARM TIP, perpendicular to the wire at neutral.
+// Pocket floor sits at r=21.4, so the servo side face is at 21.4 and the
+// shaft pivot at r=15.3.
 // ------------------------------------------------------------------------------
-tail_control(0,  88);                       // right elevator
-mirror([1, 0, 0]) tail_control(0, 88);      // left elevator = true mirror
-tail_control(90, 60);                       // rudder
+tail_control(0,  88, tail_servo_z, 233,  [23.3, -(ctrl_horn_r + 0.3), tail_servo_z + 12]);
+mirror([1, 0, 0])
+    tail_control(0, 88, tail_servo_z, 233, [23.3, -(ctrl_horn_r + 0.3), tail_servo_z + 12]);
+tail_control(90, 60, tail_rudder_z, -38, [21.5, -(ctrl_horn_r + 0.3), tail_rudder_z - 1.9]);
 
-module tail_control(angle, span) {
-    arm_tip  = [22.2, -(ctrl_horn_r + 0.3), tail_servo_z + 12.6];
+module tail_control(angle, span, z0, horn_angle, arm_tip) {
     horn_eye = [sleeve_r + 11, -ctrl_horn_r, hinge_z - 2];
 
     rotate([0, 0, angle]) {
-        // servo on its pad, shaft end down (aft), arm toward the slot
-        translate([8.6, 12.7, tail_servo_z + servo_body[0]])
+        // servo in its pocket, shaft end down (aft), arm toward the slot
+        translate([9.2, 12.7, z0 + servo_body[0]])
             mirror([0, 0, 1])
                 mirror([0, 1, 0])
-                    servo_9g(horn_angle = 229);  // arm up-outboard, ⊥ to the wire
+                    servo_9g(horn_angle = horn_angle);
         // wire: arm tip -> angled slot -> control horn
         pushrod(arm_tip, horn_eye);
         // printed control surface, hinged in the fin TE groove
