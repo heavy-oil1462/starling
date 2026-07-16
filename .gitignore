@@ -1,1 +1,4 @@
-
+__pycache__/
+*.pyc
+*.scad.bak
+.claude/settings.local.json

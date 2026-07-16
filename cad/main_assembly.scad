@@ -1,6 +1,6 @@
 use <tail.scad>
-use <spar.scad>
-use <adapter.scad>
+use <wing_rib.scad>
+use <wing_adapter.scad>
 use <nose.scad>
 use <fuselage.scad>
 
