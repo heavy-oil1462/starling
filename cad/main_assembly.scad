@@ -52,9 +52,9 @@ color("SteelBlue") translate([0, 0, wing_station]) wing_adapter();
 // at the ARM TIP — perpendicular to the wire at neutral — and rakes down/
 // outboard through the angled wall slot to the surface horn.
 // ------------------------------------------------------------------------------
-tail_control(0,   88);   // right elevator
-tail_control(180, 88);   // left elevator
-tail_control(90,  60);   // rudder
+tail_control(0,  88);                       // right elevator
+mirror([1, 0, 0]) tail_control(0, 88);      // left elevator = true mirror
+tail_control(90, 60);                       // rudder
 
 module tail_control(angle, span) {
     arm_tip  = [22.2, -(ctrl_horn_r + 0.3), tail_servo_z + 12.6];
@@ -105,7 +105,7 @@ for (side = [1, -1]) mirror([side < 0 ? 1 : 0, 0, 0]) {
         translate([wing_servo_station, -spar_y_offset, wing_station - rib_chord / 2])
             rotate([0, -90, 0])
                 wing_rib_servo();
-    translate([wing_servo_station - 13.5, -8.4, wing_station + 6])
+    translate([wing_servo_station - 12.5, -8.4, wing_station + 6])
         rotate([180, 0, 90])
             servo_9g(horn_angle = -90);   // arm straight up, ⊥ to the wire
 
@@ -115,7 +115,7 @@ for (side = [1, -1]) mirror([side < 0 ? 1 : 0, 0, 0]) {
     color("Gold")
         translate([300, 0, aileron_hinge_z])
             rotate([0, -90, -90])
-                control_surface(span = 120, horn_pos = 24.5, horn_up = true);
-    pushrod([wing_servo_station + 14.5, 7.7, wing_station - 11],
-            [wing_servo_station + 14.5, ctrl_horn_r, aileron_hinge_z - 2]);
+                control_surface(span = 120, horn_pos = 25.5, horn_up = true);
+    pushrod([wing_servo_station + 15.5, 7.7, wing_station - 11],
+            [wing_servo_station + 15.5, ctrl_horn_r, aileron_hinge_z - 2]);
 }

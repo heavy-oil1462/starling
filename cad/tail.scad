@@ -119,12 +119,14 @@ module tail_assembly() {
             }
         }
         
-        // Pushrod slots through the wall, one per control surface. The
-        // horizontal-fin rods run on the belly side, the rudder rod on the
-        // right side — mirrors where the surface horns hang.
-        pushrod_slot(rotation_angle = 0,   offset_y = -pushrod_offset);
-        pushrod_slot(rotation_angle = 180, offset_y = pushrod_offset);
-        pushrod_slot(rotation_angle = 90,  offset_y = -pushrod_offset);
+        // Pushrod slots through the wall, one per control surface. Both
+        // elevator linkages live on the BELLY side; the left one is a true
+        // MIRROR of the right (a plain rotate would flip its horn to the
+        // top while the slot stayed low). Rudder linkage on the right side.
+        pushrod_slot(rotation_angle = 0, offset_y = -pushrod_offset);
+        mirror([1, 0, 0])
+            pushrod_slot(rotation_angle = 0, offset_y = -pushrod_offset);
+        pushrod_slot(rotation_angle = 90, offset_y = -pushrod_offset);
     }
 }
 
@@ -143,9 +145,10 @@ module fuselage_sleeve() {
         }
 
     // Internal servo locating pads (also after the difference — they live
-    // inside the bore), one per control surface, same angles as the slots
+    // inside the bore), one per control surface, matching the slots: the
+    // left elevator pad is the mirror of the right one
     servo_pad(rotation_angle = 0);
-    servo_pad(rotation_angle = 180);
+    mirror([1, 0, 0]) servo_pad(rotation_angle = 0);
     servo_pad(rotation_angle = 90);
 
     difference() {

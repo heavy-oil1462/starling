@@ -82,22 +82,22 @@ cable_hole_y_offset = 1.5;
 //   RIB MODULES
 // ==============================================================================
 
-module wing_rib_with_cutouts() {
+module wing_rib_with_cutouts(t = rib_thickness) {
     spar_x_offset = rib_chord * (1 - spar_x_pos);
     cable_hole_x_offset = rib_chord * (1 - cable_hole_x_pos);
 
     difference() {
         translate([rib_chord, 0, 0])
             rotate([0, 180, 0])
-                linear_extrude(height = rib_thickness, center = true)
+                linear_extrude(height = t, center = true)
                     airfoil_poly(c = rib_chord, naca = naca_code);
 
         for (dx = [0, spar_spacing])
             translate([spar_x_offset + dx, spar_y_offset, 0])
-                cylinder(h = rib_thickness * 2 + 0.2, d = spar_hole_d, center = true);
+                cylinder(h = t * 2 + 0.2, d = spar_hole_d, center = true);
 
         translate([cable_hole_x_offset, cable_hole_y_offset, 0])
-            cylinder(h = rib_thickness * 2 + 0.2, d = cable_hole_diameter, center = true);
+            cylinder(h = t * 2 + 0.2, d = cable_hole_diameter, center = true);
     }
 }
 
@@ -111,6 +111,10 @@ module wing_rib_with_cutouts() {
 // skin — fair it with tape, or drop to a 5 g servo which fits flush. The
 // strip above the bay thins to ~1.5 mm; the glued-on top skin backs it up.
 // The bay's forward edge keeps ~1 mm of material to the rear spar hole.
+// The servo rib prints thicker than the standard ribs — it reacts the whole
+// servo/linkage load until the skin is on, so it needs the extra stiffness.
+servo_rib_thickness = 4;
+
 module wing_rib_servo() {
     bay_l    = servo_body[0] + fit_tol;
     bay_h    = servo_body[1] + fit_tol;
@@ -118,9 +122,9 @@ module wing_rib_servo() {
     bay_y0   = -6.9;               // keeps a printable strip under the top surface
 
     difference() {
-        wing_rib_with_cutouts();
-        translate([bay_x_hi - bay_l, bay_y0, -rib_thickness])
-            cube([bay_l, bay_h, rib_thickness * 2]);
+        wing_rib_with_cutouts(servo_rib_thickness);
+        translate([bay_x_hi - bay_l, bay_y0, -servo_rib_thickness])
+            cube([bay_l, bay_h, servo_rib_thickness * 2]);
     }
 }
 
