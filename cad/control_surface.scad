@@ -19,7 +19,9 @@ include <design_params.scad>
 
 $fn = 60;
 
-module control_surface(span = 88, horn_pos = 12, with_horn = true) {
+// horn_up: flips the horn to the +Z side of the surface — used by the
+// ailerons, whose linkage lives ABOVE the wing (low-pressure side).
+module control_surface(span = 88, horn_pos = 12, with_horn = true, horn_up = false) {
     te_thickness = 1.2;
 
     difference() {
@@ -36,10 +38,11 @@ module control_surface(span = 88, horn_pos = 12, with_horn = true) {
                         ]);
 
             // Control horn: a blade in the X-Z plane, pushrod hole at
-            // ctrl_horn_r below the hinge line
+            // ctrl_horn_r from the hinge line
             if (with_horn)
                 translate([0, horn_pos, 0])
-                    horn();
+                    mirror([0, 0, horn_up ? 1 : 0])
+                        horn();
         }
 
         // Hinge groove along the LE face (mirror of the fin TE groove)

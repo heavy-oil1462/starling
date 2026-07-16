@@ -25,7 +25,7 @@
 | Wing servo mount | `cad/wing_servo_mount.scad` | Clips onto both spars near the tube; servo hides inside the wing, wire runs to the aileron |
 | Calibration prints | `cad/calibration/` | Tube fit ring, motor screw pattern, servo pocket — print these first |
 
-All servos mount internally — nothing but a 2.5 mm wire slot meets the airflow. Throw analysis (±53° mechanical vs ±25° targets): `docs/control-system.md` and `scripts/throw_check.py`.
+All servos mount internally — the tail servos sit high in the sleeve with angled wire slots, the aileron servos hide inside the wing with just the arm through the upper skin. Mechanical throw: ±32° tail / ±45° aileron vs ±25°/±20° targets — analysis in `docs/control-system.md`, checked by `scripts/throw_check.py`.
 
 Print-ready STLs for every part are committed under `stl/`.
 

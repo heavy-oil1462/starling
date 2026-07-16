@@ -2,16 +2,22 @@
 """Control-throw sanity check for the Starling control system.
 
 Answers "how much surface movement realistically exists?" from the shared
-parameters (cad/design_params.scad): a 9 g servo swings its horn through
-±servo_travel_deg; the wire pushrod converts that to linear travel; the
-control horn converts it back to surface deflection. Also checks that the
-pushrod wall slot is long enough and that the deflected surface keeps clear
-of the motor face (pusher prop).
+parameters (cad/design_params.scad).
 
-Targets (rule of thumb for a docile payload hauler):
-  elevator/rudder >= 25 deg each way, aileron >= 20 deg each way.
+Linkage model (see docs/control-system.md):
+- The wire attaches at the TIP of the full-length servo arm. A 9 g arm can
+  sweep ~180 deg total, but the linkage is only near-linear while the arm
+  stays within ~+/-45 deg of perpendicular-to-the-wire — that usable window
+  is servo_travel_deg.
+- Tail: the servo sits high in the sleeve and the wire rakes down/outboard
+  at tail_slot_angle off the fuselage axis. The surface horn's eye travels
+  along the fuselage axis, so only cos(tail_slot_angle) of the wire motion
+  becomes horn motion.
+- Wing: the aileron sits directly behind its servo, linked by a short wire
+  above the wing — rake ~0, full transfer.
 
-Exit 1 if any target or clearance fails — regen_all.py runs this as a gate.
+Targets (docile payload hauler): elevator/rudder >= 25 deg, aileron >= 20 deg
+each way. Exit 1 on any failure — regen_all.py runs this as a gate.
 """
 
 import math
@@ -19,46 +25,48 @@ import sys
 
 from design_params import PARAMS as P
 
-TARGETS = {"elevator": 25, "rudder": 25, "aileron": 20}
+
+def surface_throw(linear, transfer, horn_r):
+    eff = linear * transfer
+    if eff >= horn_r:
+        return 90.0
+    return math.degrees(math.asin(eff / horn_r))
 
 
 def main():
     horn_r = P["servo_horn_r"]
     ctrl_r = P["ctrl_horn_r"]
     travel = P["servo_travel_deg"]
-    chord = P["ctrl_chord"]
+    rake = P["tail_slot_angle"]
 
     linear = horn_r * math.sin(math.radians(travel))
-    if linear >= ctrl_r:
-        deflection = 90.0
-    else:
-        deflection = math.degrees(math.asin(linear / ctrl_r))
+    print(f"arm tip: {horn_r} mm x +/-{travel} deg (of ~180 total) -> +/-{linear:.1f} mm at the wire")
 
-    print(f"servo horn {horn_r} mm x +/-{travel} deg -> +/-{linear:.1f} mm at the wire")
-    print(f"control horn {ctrl_r} mm            -> +/-{deflection:.1f} deg surface deflection")
-
+    cases = {
+        "elevator": (math.cos(math.radians(rake)), 25),
+        "rudder":   (math.cos(math.radians(rake)), 25),
+        "aileron":  (1.0, 20),
+    }
     ok = True
-    for surface, target in TARGETS.items():
+    for surface, (transfer, target) in cases.items():
+        deflection = surface_throw(linear, transfer, ctrl_r)
         good = deflection >= target
         ok &= good
-        print(f"[{'ok' if good else 'FAIL'}] {surface}: +/-{deflection:.1f} deg "
-              f"available vs +/-{target} deg target "
-              f"(dial down with transmitter endpoints/expo)")
+        note = f"rake {rake} deg -> x{transfer:.2f}" if transfer < 1 else "direct link"
+        print(f"[{'ok' if good else 'FAIL'}] {surface}: +/-{deflection:.1f} deg available "
+              f"({note}) vs +/-{target} deg target")
 
-    # Pushrod slot: must contain the full wire sweep plus the wire itself
-    slot_needed = 2 * linear + P["pushrod_d"] + 2  # +2 mm margin
+    # Angled slot channel: must contain the wire's along-axis sweep + wire + margin
+    slot_needed = 2 * linear + P["pushrod_d"] + 2
     good = P["pushrod_slot_len"] >= slot_needed
     ok &= good
-    print(f"[{'ok' if good else 'FAIL'}] wall slot: {P['pushrod_slot_len']} mm "
+    print(f"[{'ok' if good else 'FAIL'}] slot channel: {P['pushrod_slot_len']} mm "
           f">= {slot_needed:.1f} mm needed")
 
-    # Pusher clearance: the tail surfaces hinge at ctrl_chord+2 and reach to
-    # 2 mm above the motor face at NEUTRAL (deflection only moves the TE away
-    # from the face). The prop must sit behind the face with clearance.
-    te_gap = (chord + 2) - chord
-    print(f"[info] tail surface TE sits {te_gap} mm forward of the motor face at neutral;")
-    print("       deflection increases that gap — prop clearance is set by the motor's")
-    print("       own standoff, keep >= 5 mm between prop disc and motor face.")
+    print("[info] never program the arm past ~+/-60 deg: near +/-90 the arm goes")
+    print("       parallel to the wire and the linkage binds instead of moving.")
+    print("[info] tail surface TE sits 2 mm forward of the motor face at neutral;")
+    print("       deflection increases that gap — keep >= 5 mm motor face to prop disc.")
 
     return 0 if ok else 1
 

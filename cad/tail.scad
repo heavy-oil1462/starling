@@ -17,9 +17,9 @@ sleeve_fillet_radius = sleeve_wall;    // Radius of the front lip
 motor_mount_solid_length = 4;          // Solid section at rear (starts at Z=0)
 
 // --- Internal Rim (tube stop) ---
-// Keeps the paper tube from sliding over the servo bodies, which protrude
-// into the bore at z ~4-36. The rim top (= tail_tube_stop) is where the
-// tube bottoms out; main_assembly.scad places the tube from the same value.
+// Keeps the paper tube off the servo bay (pads end just below the rim).
+// The rim top (= tail_tube_stop) is where the tube bottoms out;
+// main_assembly.scad places the tube from the same value.
 rim_height          = 4;               // Height of the rim (in Z)
 rim_thickness       = 2;               // Radial protrusion into the bore
 rim_z_position      = tail_tube_stop - rim_height;
@@ -52,25 +52,22 @@ horizontal_fin_sweep = 5;
 motor_wire_hole_dia  = 10;
 motor_mount_screw_hole_depth = motor_mount_solid_length + 0.2;
 
-// --- Servo Mounting (INTERNAL — servos live inside the sleeve) ---
+// --- Servo Mounting (INTERNAL — servos live HIGH inside the sleeve) ---
 // The servos sit against the inner wall on shallow locating pads, lying on
-// their sides so the output shaft points tangentially: the horn swings in
-// the radial/axial plane and drives a wire pushrod RADIALLY out through a
-// small slot in the wall to the control horn — nothing but a 2.5 mm slot
-// disturbs the outer surface (the old external blister + exposed linkage
-// is gone). Install through the open front end before the tube goes in
-// (the tube stops at the internal rim, above the servo bay).
-// Throw numbers: scripts/throw_check.py.
+// their sides so the output shaft points tangentially and the full-length
+// arm swings in the radial/axial plane. They mount high (shaft end at
+// tail_servo_z, body up toward the rim) so the wire, attached at the ARM
+// TIP, rakes down and outboard at ~tail_slot_angle through an ANGLED wall
+// slot to the control-surface horn — the arm is perpendicular to the wire
+// at neutral, and nothing but a 2.5 mm slot disturbs the outer surface.
+// Install through the open front end before the tube goes in (the tube
+// stops at the internal rim; the pads end below it).
+// Throw and rake numbers: scripts/throw_check.py.
 
 servo_body_length   = servo_body[0];
 tol                 = fit_tol;         // Printing tolerance (shared)
 epsilon             = 1;               // Cut overlap
-pushrod_offset      = ctrl_horn_r + 2; // pushrod plane, offset from fin centerline
-servo_bay_z_start   = motor_mount_solid_length + 1;
-
-// The control horn sits just inboard of the hinge line; the pushrod plane
-// and slot center on it
-pushrod_z           = fin_servo_gap - 2;
+pushrod_offset      = ctrl_horn_r;     // pushrod plane, offset from fin centerline
 
 // ==============================================================================
 //   MAIN RENDER
@@ -281,12 +278,12 @@ module fin_airfoil_profile(chord, thickness) {
 // recess is placed so the horn plane lands on the pushrod plane (offset
 // -pushrod_offset from the fin centerline in this rotated frame).
 module servo_pad(rotation_angle = 0) {
-    recess_y0 = -pushrod_offset + 0.5;                    // horn side
+    recess_y0 = -pushrod_offset - 0.5;                    // arm side
     recess_w  = servo_height + tol;
     pad_y0    = recess_y0 - 3;
     pad_y1    = recess_y0 + recess_w + 3;
-    pad_z0    = servo_bay_z_start - 3;
-    pad_l     = servo_body_length + tol + 6;
+    pad_z0    = tail_servo_z - 3;
+    pad_l     = tail_tube_stop - pad_z0;   // capped below the tube stop
     // Flat mounting face, inboard of the wall at the pad's widest edge
     face_x    = sqrt(pow(tube_radius, 2) - pow(max(abs(pad_y0), abs(pad_y1)), 2)) - 0.5;
 
@@ -300,17 +297,18 @@ module servo_pad(rotation_angle = 0) {
                     cylinder(pad_l, r = tube_radius + 0.5);
             }
             // Locating recess = servo side profile, 1.2 deep
-            translate([face_x - 0.1, recess_y0, servo_bay_z_start])
+            translate([face_x - 0.1, recess_y0, tail_servo_z])
                 cube([1.3, recess_w, servo_body_length + tol]);
         }
 }
 
-// Slot for the wire pushrod: cuts the servo pad and the wall so the rod can
-// run radially from the horn (inside) to the control horn (outside) and
-// sweep along Z through the full servo travel. Length sized by
-// scripts/throw_check.py.
+// ANGLED slot for the wire pushrod: a channel through the pad and the wall,
+// aligned with the rod's raked path (tail_slot_angle off the fuselage axis)
+// from the arm tip down/outboard to the control horn. Channel length =
+// pushrod_slot_len; the extra Z-height gives the wire room to sweep.
 module pushrod_slot(rotation_angle = 0, offset_y = 0) {
     rotate([0, 0, rotation_angle])
-        translate([tube_radius - 9, offset_y - pushrod_slot_w / 2, pushrod_z - pushrod_slot_len / 2])
-            cube([9 + sleeve_wall + 2, pushrod_slot_w, pushrod_slot_len]);
+        translate([tube_radius + 1.5, offset_y, tail_servo_z + 6])
+            rotate([0, 90 - tail_slot_angle, 0])
+                cube([pushrod_slot_len, pushrod_slot_w, 9], center = true);
 }

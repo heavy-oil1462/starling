@@ -15,19 +15,18 @@ module servo_9g(horn_angle = 0) {
 
     color("DarkSlateGray") {
         // Body (lying on its side: height along Y)
-        translate([0, 0, 0])
-            cube([16, servo_height - 5, body_l]);
-        // Mounting flange (sticks out along Z at the shaft end)
-        translate([4, 0, -(servo_flange[0] - body_l) / 2])
-            cube([2.5, servo_height - 5, servo_flange[0]]);
+        cube([body_w, servo_height - 5, body_l]);
+        // Mounting flange (perpendicular to the shaft, near the top)
+        translate([0, servo_height - 7.5, -(servo_flange[0] - body_l) / 2])
+            cube([body_w, 2.5, servo_flange[0]]);
         // Shaft boss + shaft (axis along Y)
-        translate([8, servo_height - 5, body_l - 6])
+        translate([body_w / 2, servo_height - 5, body_l - 6])
             rotate([-90, 0, 0])
                 cylinder(h = 5, d = 11, $fn = 24);
     }
-    // Horn (swings in the X-Z plane)
+    // Full-length arm (the wire connects at its far end)
     color("White")
-        translate([8, servo_height + 0.5, body_l - 6])
+        translate([body_w / 2, servo_height + 0.5, body_l - 6])
             rotate([90, 0, 0])
                 rotate([0, 0, horn_angle])
                     hull() {

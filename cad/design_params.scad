@@ -54,12 +54,18 @@ ctrl_chord       = 22;   // control-surface chord (elevator / rudder / aileron)
 ctrl_thickness   = 4;    // control-surface root thickness = fin thickness
 hinge_groove_w   = 1.6;  // groove for the hinge strip/tape, both fin TE and surface LE
 hinge_groove_d   = 2.5;
-pushrod_d        = 1.2;  // piano-wire pushrod
+pushrod_d        = 1.2;  // piano-wire pushrod, attached at the TIP of both arms
 pushrod_slot_w   = 2.5;  // wall slot the pushrod moves in
-pushrod_slot_len = 18;   // covers full servo travel + rod + margin (see throw_check.py)
-servo_horn_r     = 10;   // usable horn radius on a 9 g servo
-servo_travel_deg = 40;   // realistic one-sided 9 g travel at standard PWM
-ctrl_horn_r      = 8;    // control-surface horn radius
+pushrod_slot_len = 18;   // slot channel length along the rod (see throw_check.py)
+servo_horn_r     = 10;   // full arm length — the wire connects at the far end
+servo_travel_deg = 45;   // used one-sided travel; the arm can do ~±90 (180 total)
+                         // but the linkage stays near-linear only within ±45
+ctrl_horn_r      = 10;   // control-surface horn = servo horn -> 1:1 linkage
+
+// Tail linkage geometry: servos sit HIGH in the tail sleeve and the wire
+// rakes down/outboard through an ANGLED wall slot to the surface horn.
+tail_servo_z    = 30;    // aft (shaft) end of the tail servo bodies
+tail_slot_angle = 42;    // rod angle off the fuselage axis, in the radial plane
 
 // --- Motor (22xx class, rear pusher) ---
 motor_shaft_hole_d = 10;

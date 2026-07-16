@@ -44,23 +44,27 @@ color("Tomato")
 color("SteelBlue") translate([0, 0, wing_station]) wing_adapter();
 
 // ------------------------------------------------------------------------------
-// Tail controls: one block per surface, rotated to its fin. Servo lies on its
-// internal pad (horn on the pushrod plane), the wire runs radially out
-// through the wall slot to the horn of the printed control surface.
+// Tail controls: one block per surface, rotated to its fin. Servo sits HIGH
+// on its internal pad, shaft (aft end) at tail_servo_z + 6; the wire attaches
+// at the ARM TIP — perpendicular to the wire at neutral — and rakes down/
+// outboard through the angled wall slot to the surface horn.
 // ------------------------------------------------------------------------------
 tail_control(0,   88);   // right elevator
 tail_control(180, 88);   // left elevator
 tail_control(90,  60);   // rudder
 
 module tail_control(angle, span) {
+    arm_tip  = [22.2, -(ctrl_horn_r + 0.3), tail_servo_z + 12.6];
+    horn_eye = [sleeve_r + 11, -ctrl_horn_r, hinge_z - 2];
+
     rotate([0, 0, angle]) {
-        // servo on its pad, shaft on the pushrod plane
-        translate([8.6, 12.7, 5])
-            mirror([0, 1, 0])
-                servo_9g(horn_angle = 90);
-        // wire: servo horn -> through the slot -> control horn
-        pushrod([12, -(ctrl_horn_r + 2), pushrod_z],
-                [sleeve_r + 12, -ctrl_horn_r, pushrod_z]);
+        // servo on its pad, shaft end down (aft), arm toward the slot
+        translate([8.6, 12.7, tail_servo_z + servo_body[0]])
+            mirror([0, 0, 1])
+                mirror([0, 1, 0])
+                    servo_9g(horn_angle = 229);  // arm up-outboard, ⊥ to the wire
+        // wire: arm tip -> angled slot -> control horn
+        pushrod(arm_tip, horn_eye);
         // printed control surface, hinged in the fin TE groove
         color("Gold")
             translate([sleeve_r - 1 + 10, 0, hinge_z])
@@ -91,24 +95,24 @@ for (side = [1, -1]) mirror([side < 0 ? 1 : 0, 0, 0]) {
                     if (i == 0) wing_rib_root();
                     else        wing_rib_with_cutouts();
 
-    // aileron servo mount clipped onto both spars, close to the tube
-    translate([70, -7.5, wing_station + adapter_length / 2 - spar_spacing / 2])
+    // aileron servo mount clipped onto both spars, moved outboard so the
+    // aileron sits DIRECTLY BEHIND it; the servo arm pokes through a small
+    // skin slot and links to the aileron horn ABOVE the wing (low-pressure
+    // side). The rib cable holes now only carry the servo lead inboard.
+    translate([310, -7.5, wing_station + adapter_length / 2 - spar_spacing / 2])
         rotate([0, -90, -90]) {
             color("SteelBlue") wing_servo_mount();
             translate([-4, -11, 2.5])
                 rotate([0, -90, 0])
-                    servo_9g();
+                    servo_9g(horn_angle = -90);   // arm straight up
         }
 
-    // aileron at the outboard TE + the long wire from the servo. The wire
-    // threads the ribs' cable holes (60% chord, on the chord line) and only
-    // drops to the horn after the last rib it crosses.
+    // aileron at the outboard TE, horn up, short link from the servo arm
+    // tip above the wing (horn_pos matches the servo arm plane at x=322)
+    aileron_hinge_z = wing_station - rib_chord / 2 + ctrl_chord;
     color("Gold")
-        translate([300, 0, wing_station - rib_chord / 2 + ctrl_chord])
+        translate([300, 0, aileron_hinge_z])
             rotate([0, -90, -90])
-                control_surface(span = 120, horn_pos = 2);
-    cable_z = wing_station + rib_chord / 2 - 0.6 * rib_chord;  // cable-hole line
-    pushrod([77, 0, cable_z - 1], [285, 0, cable_z]);
-    pushrod([285, 0, cable_z],
-            [302, -ctrl_horn_r, wing_station - rib_chord / 2 + ctrl_chord - 2]);
+                control_surface(span = 120, horn_pos = 22, horn_up = true);
+    pushrod([322, 11, wing_station - 11], [322, ctrl_horn_r, aileron_hinge_z - 2]);
 }
