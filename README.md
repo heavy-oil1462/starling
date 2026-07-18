@@ -7,7 +7,7 @@
 ## Project goals
 
 1. **Cheap and expendable** — paper-tube fuselage, printed joints, hobby-grade electronics. Losing the airframe should not hurt.
-2. **Payload modularity** — payloads mount on adapters that clamp the round tube, so they can be added, swapped, or slid anywhere along the fuselage.
+2. **Payload modularity** — payloads ride *inside* the tube, not bolted to the outside. The tube is one uncut length, cut to suit the mission; a printed adapter wraps the payload so it slides into the tube bore (~47 mm) and can be positioned anywhere along it. A payload that is already a cylinder of the right diameter needs no adapter at all.
 3. **Movable wing** — the wing mount slides along the tube to re-trim CG for whatever payload is fitted.
 4. **Quick assembly** — parts slide over/into the tube; the goal is field-assembly speed, not workshop craftsmanship.
 5. **ArduPilot brain** — flight controller config will live in this repo alongside the CAD (planned).
@@ -23,11 +23,22 @@
 | Tail sleeve | `cad/tail.scad` | Prints upright, support-free: internal push-fit servo pockets, angled pushrod slots, fin sockets, rear motor mount (pusher) |
 | Tail fins | `cad/tail_fin_horizontal.scad` (×2), `cad/tail_fin_vertical.scad` | Print flat (strongest orientation); root tabs glue into the sleeve's fin sockets |
 | Control surfaces | `cad/control_surface.scad` | One part, three spans (elevator/rudder/aileron); tape-strip hinge in matching grooves |
-| Calibration prints | `cad/calibration/` | Tube fit ring, motor screw pattern, servo pocket — print these first |
+| Calibration prints | `cad/calibration/` | Tube fit ring (OD), tube bore gauge (ID), motor screw pattern, servo pocket — print these first |
 
 All servos mount internally — the tail servos sit high in the sleeve with angled wire slots, the aileron servos hide inside the wing with just the arm through the upper skin. Mechanical throw: ±32° tail / ±45° aileron vs ±25°/±20° targets — analysis in `docs/control-system.md`, checked by `scripts/throw_check.py`.
 
 Print-ready STLs for every part are committed under `stl/`.
+
+## Calibrate to your tube first
+
+Postal tube varies between batches, and the paper wall varies more than the outside does — so the OD does not tell you the bore. Both are measured, and both gauges print as **three numbered variants at once**:
+
+| Print | Measures | Set |
+|---|---|---|
+| `stl/tube_fit_ring.stl` | outside diameter — what sleeves slide over | `tube_od` |
+| `stl/tube_bore_gauge.stl` | inside diameter — what plugs slide into | `tube_id` |
+
+Print one, try all three variants on your actual tube, and read the number engraved on the one that fits best. Type those two numbers into `cad/design_params.scad`, re-run `scripts/regen_all.py`, and every sleeve and plug in `stl/` is now cut for your tube. If the winner is an end variant your tube is outside the bracket — set the value to that number and reprint the gauge to re-centre.
 
 ## Working on the CAD
 

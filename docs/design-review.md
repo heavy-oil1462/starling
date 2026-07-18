@@ -50,6 +50,6 @@ Reviewed by rendering every part headlessly (`scripts/regen_all.py`) and inspect
 
 ## Remaining follow-ups
 
-- Measure the real tube (OD and wall) and set `tube_od`/`tube_wall`; print `tube_fit_ring` to dial in `sleeve_clearance`.
+- Measure the real tube: print `tube_fit_ring` and `tube_bore_gauge`, and set `tube_od`/`tube_id` from the best-fitting variant of each. Repeat per tube batch.
 - Pick the motor/prop combo and verify prop-vs-elevator clearance (finding 8).
 - If flight tests show the bonded spar joints loosening, design the continuous-spar variant of the adapter (finding 5's upgrade path).

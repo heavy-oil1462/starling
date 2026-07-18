@@ -5,7 +5,7 @@ Open-source, cheap, quick-to-build RC plane: a paper-tube fuselage (50 mm-class 
 ## Core design ideas (do not design against these)
 
 - **The fuselage is a paper tube.** Every printed part is a sleeve (slides over the tube) or a plug (slides inside). The tube is consumable; the printed parts and electronics are the reusable kit.
-- **Payload modularity**: payloads mount via adapters that clamp the round tube, so they can be added or moved anywhere along the fuselage. New payload parts must reuse the tube-sleeve interface.
+- **Payload modularity**: payloads go INSIDE the tube, never on the outside. The tube is a single uncut length (sized per mission); a printed adapter wraps the payload so it slides into the tube bore and can sit anywhere along it. New payload parts are plugs — they must reuse the tube-bore (plug) interface, not the sleeve one. A payload that is already a correct-diameter cylinder needs no adapter.
 - **Movable wing**: the wing adapter slides along the tube to re-trim CG for whatever payload is fitted. Nothing may assume a fixed wing station.
 - Wings are built from 3D-printed ribs on 6 mm carbon-rod spars, skinned with foam board.
 
@@ -13,7 +13,8 @@ Open-source, cheap, quick-to-build RC plane: a paper-tube fuselage (50 mm-class 
 
 - `cad/design_params.scad` — **single source of truth** for every dimension two parts share. Parts `include` it; `check_params.py` fails the build if any file shadows one of its names. Change shared values there and only there.
 - `cad/` — one .scad per printable part + `main_assembly.scad` (visual fit check, renders to `main_assembly.png`; all placement derives from design_params, e.g. `wing_station`)
-- `cad/calibration/` — small test prints for dialing in fits (tube ring, motor pattern, servo pocket)
+- `cad/calibration/` — small test prints for dialing in fits (tube OD ring, tube bore gauge, motor pattern, servo pocket). Gauges print as 3 numbered variants; the user prints one, picks the best fit, and types that number into `design_params.scad`.
+- `cad/lib/` — shared OpenSCAD helper modules, not printable parts (regen_all does not scan it)
 - `cad/archive/` — dead versions, never rendered or reviewed
 - `stl/` — committed build products, print-ready; regenerate, never hand-edit
 - `scripts/` — Python tools (see below)
@@ -36,7 +37,7 @@ Conventions:
 
 ## Key off-the-shelf parts
 
-- Fuselage: ~53 mm OD paper/postal tube (calibrate with `cad/calibration/tube_fit_ring.scad` before trusting any sleeve fit)
+- Fuselage: ~53 mm OD paper/postal tube. `tube_od` AND `tube_id` are both measured per batch (paper wall varies, so OD does not predict the bore) — calibrate with `tube_fit_ring.scad` before trusting a sleeve and `tube_bore_gauge.scad` before trusting a plug
 - Wing spars: 6 mm carbon rods (6.2 mm printed holes)
 - Servos: 9 g class (SG90 footprint), all mounted INTERNALLY — tail servos on pads inside the sleeve, aileron servos carried by a servo rib (`wing_rib_servo.scad`); wire pushrods exit through small slots (drag rule: nothing but the slot meets the airflow). Throw/slot/clearance numbers: `scripts/throw_check.py`, rationale in `docs/control-system.md`.
 - Pushrods: 1.2 mm piano wire; control surfaces hinge on a tape/PP strip glued into matching grooves (never a printed living hinge)
