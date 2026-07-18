@@ -43,7 +43,8 @@ color("Tomato")
     translate([0, 0, tail_tube_stop + tube_length - nose_sleeve_length])
         cone_housing();
 
-// Wing adapter, clamped at the wing station
+// Wing adapter at the wing station — the trim rig is shown; the glue-on
+// flight variant is identical minus the clamp lugs
 color("SteelBlue") translate([0, 0, wing_station]) wing_adapter();
 
 // ------------------------------------------------------------------------------

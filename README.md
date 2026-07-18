@@ -18,7 +18,8 @@
 |---|---|---|
 | Fuselage | (bought, not printed) | 50 mm-class paper/postal tube, ~53 mm OD |
 | Nose cone | `cad/nose.scad` | Sleeve-mounted, angled FPV camera opening |
-| Wing adapter | `cad/wing_adapter.scad` | Slides on the tube, M3 belly clamp; through-sockets for the wing spars |
+| Wing adapter (trim rig) | `cad/wing_adapter.scad` | Reusable tooling: M3 belly clamp locks it anywhere along the tube while you find the CG for a payload |
+| Wing adapter (flight) | `cad/wing_adapter_glue.scad` | Same wing interface, no hardware; slid to the documented station and tacked with hot-glue fillets at the rims (`docs/wing-stations.md`) |
 | Wing ribs | `cad/wing_rib.scad`, `cad/wing_rib_servo.scad` | NACA airfoil ribs on 6 mm carbon spars, foam-board skin; all ribs sit outboard of the adapter tab, and the servo rib carries the aileron servo |
 | Tail sleeve | `cad/tail.scad` | Prints upright, support-free: internal push-fit servo pockets, angled pushrod slots, fin sockets, rear motor mount (pusher) |
 | Tail fins | `cad/tail_fin_horizontal.scad` (×2), `cad/tail_fin_vertical.scad` | Print flat (strongest orientation); root tabs glue into the sleeve's fin sockets |

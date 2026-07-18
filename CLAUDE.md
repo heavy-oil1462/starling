@@ -6,7 +6,7 @@ Open-source, cheap, quick-to-build RC plane: a paper-tube fuselage (50 mm-class 
 
 - **The fuselage is a paper tube.** Every printed part is a sleeve (slides over the tube) or a plug (slides inside). The tube is consumable; the printed parts and electronics are the reusable kit.
 - **Payload modularity**: payloads go INSIDE the tube, never on the outside. The tube is a single uncut length (sized per mission); a printed adapter wraps the payload so it slides into the tube bore and can sit anywhere along it. New payload parts are plugs — they must reuse the tube-bore (plug) interface, not the sleeve one. A payload that is already a correct-diameter cylinder needs no adapter.
-- **Movable wing**: the wing adapter slides along the tube to re-trim CG for whatever payload is fitted. Nothing may assume a fixed wing station.
+- **Movable wing**: the wing adapter slides along the tube to re-trim CG for whatever payload is fitted. Nothing may assume a fixed wing station. Two variants share one wing interface (`cad/lib/wing_adapter_common.scad`): the clamping trim rig (tooling, finds the station) and the glue-on flight part (replicas, tacked at the station documented in `docs/wing-stations.md`).
 - Wings are built from 3D-printed ribs on 6 mm carbon-rod spars, skinned with foam board.
 
 ## Layout
