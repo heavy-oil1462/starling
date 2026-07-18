@@ -12,7 +12,7 @@
 
 use <tail.scad>
 use <wing_rib.scad>
-use <wing_adapter.scad>
+use <wing_adapter_glue.scad>
 use <nose.scad>
 use <fuselage.scad>
 use <servo_9g.scad>
@@ -43,9 +43,10 @@ color("Tomato")
     translate([0, 0, tail_tube_stop + tube_length - nose_sleeve_length])
         cone_housing();
 
-// Wing adapter at the wing station — the trim rig is shown; the glue-on
-// flight variant is identical minus the clamp lugs
-color("SteelBlue") translate([0, 0, wing_station]) wing_adapter();
+// Wing adapter at the wing station — the glue-on flight variant is shown
+// (this is what a finished airframe flies); the clamping trim rig is
+// identical plus the belly lugs
+color("SteelBlue") translate([0, 0, wing_station]) wing_adapter_glue();
 
 // ------------------------------------------------------------------------------
 // Tail controls: one block per surface. Servos press into their internal
