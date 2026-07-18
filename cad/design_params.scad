@@ -14,14 +14,19 @@
 // ============================================================
 
 // --- The paper tube (bought part, consumable) ---
-tube_od     = 52.95;   // measured tube OD — verify with cad/calibration/tube_fit_ring.scad
-tube_wall   = 3;       // paper wall thickness (measure your tube)
+// BOTH diameters are measured, not derived from a nominal wall thickness:
+// paper wall varies batch to batch, so the OD does not predict the bore.
+// Print the two calibration gauges with every new batch of tube, and type
+// the number engraved on the best-fitting variant in here.
+tube_od     = 52.95;   // sleeves slide OVER this — cad/calibration/tube_fit_ring.scad
+tube_id     = 46.95;   // plugs slide INTO this  — cad/calibration/tube_bore_gauge.scad
 tube_length = 540;
 
 // --- Printed-part fits ---
-sleeve_clearance = 0;  // added to every sleeve bore diameter; tune via the fit ring
+sleeve_clearance = 0;   // added to every sleeve bore diameter; tune via the fit ring
+plug_clearance   = 0;   // subtracted from every plug OD; tune via the bore gauge
 fit_tol          = 0.2; // clearance for printed slots/pockets
-sleeve_wall      = 3;  // wall thickness of printed sleeves
+sleeve_wall      = 3;   // wall thickness of printed sleeves
 
 // --- Wing spar chain (rib holes = adapter sockets = carbon rods) ---
 spar_rod_d    = 6;     // carbon rod diameter

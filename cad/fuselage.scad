@@ -10,7 +10,7 @@ module fuselage() {
         // extend the cutter past both ends — coincident faces make the
         // boolean result non-manifold
         translate([0, 0, -0.1])
-            cylinder(h = tube_length + 0.2, r = tube_od / 2 - tube_wall);
+            cylinder(h = tube_length + 0.2, r = tube_id / 2);
     }
 }
 

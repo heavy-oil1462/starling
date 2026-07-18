@@ -370,7 +370,7 @@ module servo_pad(rotation_angle = 0, z0 = tail_servo_z) {
                     cube([tube_radius, pad_y1 - y0, pad_top - pad_z0]);
                 union() {
                     cylinder(tail_tube_stop, r = tube_radius + 0.5);
-                    cylinder(64, r = tube_radius - tube_wall - 1);
+                    cylinder(64, r = tube_id / 2 - 1);
                 }
             }
             // The pocket: open radially inward and toward the shaft side;
