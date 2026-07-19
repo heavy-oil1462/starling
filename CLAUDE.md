@@ -24,7 +24,7 @@ Open-source, cheap, quick-to-build RC plane: a paper-tube fuselage (50 mm-class 
 
 Everything runs headless through nix — **never download or manually install binaries** (`nix shell` / `nix build` only). OpenSCAD comes from `nixpkgs#openscad-unstable`.
 
-- `python3 scripts/regen_all.py` — the single entry point for derived artifacts: gates (params, throw) → all STLs → `main_assembly.png`. Run after ANY .scad change (see the `regen-outputs` skill). `--stl-only` exports just the printable STLs.
+- `python3 scripts/regen_all.py` — the single entry point for derived artifacts: gates (params, throw) → all STLs → `main_assembly.png`. Run after ANY .scad change (see the `regen-outputs` skill). `--stl-only` exports just the printable STLs. `--check` is the read-only commit gate (the `verify` skill, and CI): fresh renders are byte-compared against the committed artifacts, so a .scad change can never merge with a stale STL or README image.
 - `python3 scripts/check_params.py` — cross-file interface-dimension check; `[FAIL]` means parts won't fit the same tube. Gate every commit on it.
 - `python3 scripts/throw_check.py` — control-surface throw, pushrod-slot length, and pusher-prop clearance from the shared params (via `scripts/design_params.py`, the Python-side parser of `design_params.scad`).
 - `python3 scripts/render_scad.py <file.scad> <out.png|stl> [openscad args]` — one-off headless renders (see the `openscad-review` skill).
