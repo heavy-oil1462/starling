@@ -33,12 +33,14 @@ linkage is most linear and transmits the most motion.
   strapping tape; the rib itself is bonded to spars and skin, so the servo
   reacts against real structure — an earlier spar-clip cradle was dropped
   because printed clips on smooth carbon rod rotate, creep, and pry open
-  under wire loads). The aileron sits **directly behind the servo**; the arm
-  pokes through a small slot in the **upper** skin (low-pressure side) and a
-  short wire links to the aileron's up-turned horn just above the wing. A
-  9 g servo stands ~3 mm proud of the LOWER skin at the bay (the aft bay of
-  a 15 %/100 mm section is thinner than the servo) — fair it with tape, or
-  use a 5 g servo which fits flush. Rib cable holes carry the lead inboard.
+  under wire loads). The servo rib is not an extra station: it **replaces
+  the standard rib** at its place in the row. The aileron root starts just
+  outboard of it; the arm pokes through a small slot in the **upper** skin
+  (low-pressure side) and a short wire links to the aileron's up-turned horn
+  just above the wing. A 9 g servo stands ~3 mm proud of the LOWER skin at
+  the bay (the aft bay of a 15 %/100 mm section is thinner than the servo) —
+  fair it with tape, or use a 5 g servo which fits flush. Rib cable holes
+  carry the lead inboard.
 
 ## Control surfaces
 
@@ -47,10 +49,23 @@ parameter): elevator 88, rudder 60, aileron 120 mm; chord 22 mm, tapering
 4 → 1.2 mm. The tail fins are shortened by `ctrl_chord + 2` so the surfaces
 fill the gap without ever crossing the motor-face plane.
 
-**Hinge**: the fin TE and the surface LE both carry a 1.6 × 2.5 mm groove;
-a flexible strip (fiber tape folded, or 0.5 mm PP sheet) glues into both.
-Printed living hinges crack within dozens of cycles — the strip doesn't, and
-it suits the expendable-airframe idea (surfaces survive, tube doesn't).
+**Tail hinge**: the fin TE and the surface LE both carry a 1.6 × 2.5 mm
+groove; a flexible strip (fiber tape folded, or 0.5 mm PP sheet) glues into
+both. Printed living hinges crack within dozens of cycles — the strip
+doesn't, and it suits the expendable-airframe idea (surfaces survive, tube
+doesn't).
+
+**Aileron mounting**: the aileron nests *inside* the wing planform — rib
+stations under its span use the TE-cropped rib (`cad/wing_rib_aileron.scad`,
+cut at the hinge line + 2 mm), so the surface fills a notch in the TE rather
+than hanging behind it. There is no printed wing TE to carry a matching
+groove, so the aileron hinges on **plain tape along the top surface**: the
+top skin ends at the crop line, tape spans from skin onto the aileron's top
+face (the aileron top sits a few mm below the skin surface — the tape
+bridges the step; add a second strip on top after checking throw). The 2 mm
+crop gap clears the 4 mm LE face swinging under the tape pivot to past
+±25°, comfortably over the ±20° target. The aileron's printed LE groove
+(shared part with the tail) is simply unused.
 
 ## How much throw actually exists
 

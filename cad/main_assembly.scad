@@ -21,12 +21,18 @@ include <design_params.scad>
 
 $fn = 60;
 
-// Spanwise rib stations. The first sits just OUTBOARD of the adapter tab tip
-// (~44.5) — ribs never overlap the adapter. The servo rib is placed
-// separately at wing_servo_station.
-rib_stations = [47, 120, 200, 280, 360, 440];
-wing_servo_station = 310;
-spar_length  = 460;
+// Spanwise rib row. The first station sits just OUTBOARD of the adapter tab
+// tip (~44.5) — ribs never overlap the adapter. One row, no doubling-up:
+// the servo rib REPLACES the standard rib at its station, stations inside
+// the aileron span take the TE-cropped rib, and the outermost station is
+// the tip rib (blind sockets — the spars are cut to end inside it).
+rib_stations         = [47, 120, 200];  // full-chord standard ribs
+aileron_rib_stations = [360];           // TE-cropped ribs under the aileron
+wing_servo_station   = 280;             // servo rib, in place of a row rib
+tip_station          = 440;             // tip rib INBOARD face
+aileron_span         = 120;
+spar_x_start = (tube_od + sleeve_clearance) / 2 + 1;
+spar_length  = tip_station + tip_spar_socket - spar_x_start;
 
 sleeve_r  = (tube_od + sleeve_clearance) / 2 + sleeve_wall;
 hinge_z   = ctrl_chord + 2;      // = fin_servo_gap in tail.scad
@@ -88,11 +94,12 @@ module tail_control(angle, span, z0, horn_angle, arm_tip) {
 // under the skin) driving the outboard aileron through a long wire.
 // ------------------------------------------------------------------------------
 for (side = [1, -1]) mirror([side < 0 ? 1 : 0, 0, 0]) {
-    // spars: two carbon rods, seated on the adapter's socket floors
+    // spars: two carbon rods, seated on the adapter's socket floors, cut so
+    // they end inside the tip rib's blind sockets
     color("DimGray")
         for (dz = [adapter_length / 2 - spar_spacing / 2,
                    adapter_length / 2 + spar_spacing / 2])
-            translate([(tube_od + sleeve_clearance) / 2 + 1, 0, wing_station + dz])
+            translate([spar_x_start, 0, wing_station + dz])
                 rotate([0, 90, 0])
                     cylinder(h = spar_length, d = spar_rod_d);
 
@@ -104,10 +111,24 @@ for (side = [1, -1]) mirror([side < 0 ? 1 : 0, 0, 0]) {
                 rotate([0, -90, 0])
                     wing_rib_with_cutouts();
 
+    for (s = aileron_rib_stations)
+        color("Gold")
+            translate([s, -spar_y_offset, wing_station - rib_chord / 2])
+                rotate([0, -90, 0])
+                    wing_rib_aileron();
+
+    // tip rib: inboard face at tip_station, rounded cap growing outboard
+    // (mirror flips its +z extrusion to global +x)
+    color("Gold")
+        translate([tip_station, -spar_y_offset, wing_station - rib_chord / 2])
+            rotate([0, -90, 0])
+                mirror([0, 0, 1])
+                    wing_rib_tip();
+
     // servo rib: carries the aileron servo in its open-bottom bay aft of the
     // rear spar; the servo's flange seats on the rib's outboard face, the
-    // arm pokes through the upper skin, and the aileron sits directly
-    // behind. Rib cable holes carry the servo lead inboard.
+    // arm pokes through the upper skin, and the aileron root starts just
+    // outboard of it. Rib cable holes carry the servo lead inboard.
     color("Gold")
         translate([wing_servo_station, -spar_y_offset, wing_station - rib_chord / 2])
             rotate([0, -90, 0])
@@ -116,15 +137,20 @@ for (side = [1, -1]) mirror([side < 0 ? 1 : 0, 0, 0]) {
         rotate([180, 0, 90])
             servo_9g(horn_angle = -90);   // arm straight up, ⊥ to the wire
 
-    // aileron at the outboard TE, horn up, short link from the servo arm
-    // tip above the wing (horn_pos matches the servo arm plane)
+    // aileron nested into the TE, root 1 mm outboard of the servo rib face
+    // (rib is 4 thick, centered on its station), horn up, short link from
+    // the servo arm tip above the wing. Taped to the top skin — see
+    // docs/control-system.md.
+    aileron_root    = wing_servo_station + 3;
     aileron_hinge_z = wing_station - rib_chord / 2 + ctrl_chord;
     // the servo arm plane sits 9.2 outboard of the rib station (flange seat
     // + boss + horn plate); the aileron horn and wire live on that plane
     color("Gold")
-        translate([300, 0, aileron_hinge_z])
+        translate([aileron_root, 0, aileron_hinge_z])
             rotate([0, -90, -90])
-                control_surface(span = 120, horn_pos = wing_servo_station + 9.2 - 300, horn_up = true);
+                control_surface(span = aileron_span,
+                                horn_pos = wing_servo_station + 9.2 - aileron_root,
+                                horn_up = true);
     pushrod([wing_servo_station + 9.2, 7.7, wing_station - 11],
             [wing_servo_station + 9.2, ctrl_horn_r, aileron_hinge_z - 2]);
 }
