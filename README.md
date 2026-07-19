@@ -58,3 +58,7 @@ python3 scripts/render_scad.py cad/nose.scad nose.png   # one-off render
 ## Status
 
 Early prototype. Structural parts exist, print, and fit together on paper (see `docs/design-review.md` for the reviewed-and-fixed findings and the open follow-ups: measure your actual tube, pick the motor/prop combo). Wing skin build notes and the ArduPilot configuration are next.
+
+## License
+
+MIT, see [LICENSE](LICENSE).
