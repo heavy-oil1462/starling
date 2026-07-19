@@ -18,6 +18,12 @@ scripts/render_scad.py cad/<file>.scad <out.png|out.stl> [extra openscad args]
 Notes (do not rediscover):
 - The sandbox's `LD_LIBRARY_PATH=/lib` crashes nix binaries; the script overrides it. Do the same if running openscad manually via `nix shell`.
 - PNG rendering uses Mesa software GL via `EGL_PLATFORM=surfaceless` — no X/xvfb needed.
+- `nixpkgs#openscad-unstable` (registry unstable) has no hydra cache and its
+  source build fails at link (lld: .debug_gdb_scripts not null terminated),
+  costing an hour before dying. `render_scad.py` therefore pins `NIXPKGS` to
+  a release branch (nixos-26.05), which ships the identical snapshot
+  prebuilt. Probe for a cached build with `--max-jobs 0` (fails fast instead
+  of source-building) before changing the pin.
 
 ## Review procedure
 

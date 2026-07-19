@@ -3,9 +3,11 @@
 //
 //   Local frame: hinge line = Y axis (span along +Y), chord extends -X (aft),
 //   thickness centered on Z. The LE face carries a hinge groove matching the
-//   groove in the fin trailing edges (and the wing TE): a flexible strip
-//   (fiber tape / 0.5 mm PP) glues into both grooves and is the hinge —
-//   printed living hinges crack, this doesn't.
+//   groove in the fin trailing edges: a flexible strip (fiber tape / 0.5 mm
+//   PP) glues into both grooves and is the hinge — printed living hinges
+//   crack, this doesn't. The AILERONS hinge on plain tape to the top skin
+//   instead (no printed wing TE to carry a groove); their LE groove is
+//   simply unused. See docs/control-system.md.
 //
 //   The control horn is integrated near the root; the pushrod hooks into its
 //   hole at ctrl_horn_r from the hinge line. Print flat, horn up, with a dab

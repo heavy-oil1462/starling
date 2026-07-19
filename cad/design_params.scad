@@ -38,6 +38,9 @@ spar_y_offset = 1.5;   // spar line sits this far above the rib chord line
 rib_chord     = 100;
 naca_code     = 2415;  // cambered lifting section
 rib_thickness = 2;
+tip_spar_socket = 6;   // blind spar-socket depth in the tip rib; the spar
+                       // rods are cut so they END inside these sockets, so
+                       // the assembly's spar length derives from this too
 
 // --- Wing adapter <-> root rib interface ---
 wing_tab_thickness = 11; // adapter tab (socket carrier; ribs sit outboard of it)

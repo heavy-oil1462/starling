@@ -27,6 +27,13 @@ from pathlib import Path
 
 _STORE_CACHE = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "starling-nix-paths"
 
+# Pinned to a release branch instead of the registry's nixpkgs-unstable:
+# hydra has NOT built openscad-unstable on unstable (its lld link fails, so
+# `nix build nixpkgs#openscad-unstable` falls into an hour-long source build
+# that dies the same way), while the release branches carry the identical
+# snapshot prebuilt in cache.nixos.org.
+NIXPKGS = "github:NixOS/nixpkgs/nixos-26.05"
+
 
 def nix_path(attr: str) -> str:
     """Resolve a nixpkgs attribute to its store path (cached across runs)."""
@@ -36,7 +43,7 @@ def nix_path(attr: str) -> str:
         if Path(p).exists():
             return p
     out = subprocess.run(
-        ["nix", "build", f"nixpkgs#{attr}", "--no-link", "--print-out-paths"],
+        ["nix", "build", f"{NIXPKGS}#{attr}", "--no-link", "--print-out-paths"],
         check=True, capture_output=True, text=True,
     ).stdout.strip().splitlines()[-1]
     cache.parent.mkdir(parents=True, exist_ok=True)
