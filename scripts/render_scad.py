@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
-"""Headless OpenSCAD renderer (no GUI, no X server needed) — nix-based.
+"""Headless OpenSCAD renderer (no GUI, no X server needed).
 
-Fetches OpenSCAD (+ Mesa software GL for PNG output) from nixpkgs and
-renders via EGL surfaceless. Never download binaries manually — everything
-comes from the nix store.
+By default fetches OpenSCAD (+ Mesa software GL for PNG output) from
+nixpkgs and renders via EGL surfaceless. Never download binaries manually
+in the sandbox — there, everything comes from the nix store.
+
+No-nix escape hatch: set OPENSCAD=/path/to/openscad and that binary is
+used as-is, with the caller's environment untouched (CI does this with
+the snapshot AppImage under xvfb-run; a workstation with a working GL
+stack needs nothing extra). The nix path stays the pinned local default.
 
 Usage:
     scripts/render_scad.py <file.scad> [output.(png|stl|dxf)] [extra openscad args...]
@@ -51,26 +56,41 @@ def nix_path(attr: str) -> str:
     return out
 
 
+def openscad_binary() -> str:
+    """The OpenSCAD to use: $OPENSCAD if set, else the pinned nix one."""
+    return os.environ.get("OPENSCAD") or nix_path("openscad-unstable") + "/bin/openscad"
+
+
+def openscad_version() -> str:
+    """Version string of the active OpenSCAD (e.g. '2026.06.28')."""
+    proc = subprocess.run([openscad_binary(), "--version"],
+                          capture_output=True, text=True, check=True)
+    # "OpenSCAD version 2026.06.28" on stderr (stdout on some builds)
+    return (proc.stderr + proc.stdout).split()[-1]
+
+
 def render(scad: str, out: str, extra_args=None) -> subprocess.CompletedProcess:
     """Render one .scad file. Returns the CompletedProcess (check output/stderr)."""
     extra_args = list(extra_args or [])
-    openscad = nix_path("openscad-unstable") + "/bin/openscad"
+    external = "OPENSCAD" in os.environ
+    openscad = openscad_binary()
 
     env = dict(os.environ)
     args = ["--backend", "Manifold"]
     if out.endswith(".png"):
-        mesa, glvnd = nix_path("mesa"), nix_path("libglvnd")
-        env.update(
-            LD_LIBRARY_PATH=f"{glvnd}/lib:{mesa}/lib",
-            __EGL_VENDOR_LIBRARY_FILENAMES=f"{mesa}/share/glvnd/egl_vendor.d/50_mesa.json",
-            EGL_PLATFORM="surfaceless",
-            LIBGL_ALWAYS_SOFTWARE="1",
-        )
+        if not external:
+            mesa, glvnd = nix_path("mesa"), nix_path("libglvnd")
+            env.update(
+                LD_LIBRARY_PATH=f"{glvnd}/lib:{mesa}/lib",
+                __EGL_VENDOR_LIBRARY_FILENAMES=f"{mesa}/share/glvnd/egl_vendor.d/50_mesa.json",
+                EGL_PLATFORM="surfaceless",
+                LIBGL_ALWAYS_SOFTWARE="1",
+            )
         if not any(a.startswith("--imgsize") for a in extra_args):
             args += ["--imgsize", "1600,1200"]
         if not any(a.startswith("--camera") for a in extra_args):
             args += ["--viewall", "--autocenter"]
-    else:
+    elif not external:
         # Non-GL outputs: keep nix libs only, the system /lib crashes nix binaries.
         env["LD_LIBRARY_PATH"] = ""
 

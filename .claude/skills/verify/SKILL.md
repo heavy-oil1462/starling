@@ -9,14 +9,14 @@ description: Read-only commit gate for Starling. Renders every part and the asse
 python3 scripts/regen_all.py --check
 ```
 
-Read-only: nothing in the working tree is touched. CI must run exactly this
-command in .github/workflows/verify.yml. Every line must be `[ok]` and the
-exit code 0 before committing.
+Read-only: nothing in the working tree is touched. CI runs exactly this
+command (.github/workflows/verify.yml, no-nix via the OpenSCAD snapshot
+AppImage and $OPENSCAD). Every line must be `[ok]` and the exit code 0
+before committing.
 
 Note: the sandbox's GitHub token lacks the `workflow` scope, so agents
-cannot push .github/workflows/ files — the user adds or edits the workflow
-themselves (the YAML for it is in PR #2). If verify's behavior changes,
-say so in the PR text so the user can mirror it in the workflow.
+cannot push .github/workflows/ files — commit workflow changes locally and
+have the user push the branch.
 
 What it checks, in order:
 
@@ -45,8 +45,16 @@ What it checks, in order:
 
 ## Notes
 
-- Renders are byte-deterministic because render_scad.py pins nixpkgs
-  (same OpenSCAD binary, software GL). If verify starts flagging PNGs that
-  look identical, suspect a changed pin or a locally built OpenSCAD, not
-  the comparison — do not loosen it to a perceptual diff without checking
-  the pin first.
+- Renders are byte-deterministic only within one OpenSCAD build. A full
+  regen records the build's version in stl/openscad_version.txt, and
+  --check compares bytes only when the running version matches; otherwise
+  it prints a [note] and self-skips the byte comparison while every other
+  check still runs. This is what lets CI use the latest snapshot AppImage
+  instead of the pinned nix binary.
+- If verify starts flagging artifacts that look identical, suspect a
+  changed nixpkgs pin or a locally built OpenSCAD slipping past the
+  version match, not the comparison — do not loosen it to a perceptual
+  diff without checking the recorded version first.
+- Running without nix anywhere: set OPENSCAD=/path/to/openscad and all
+  scripts use that binary as-is (this is how CI works). The scripts are
+  stdlib-only Python, so no pip install is needed either.

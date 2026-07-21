@@ -22,9 +22,9 @@ Open-source, cheap, quick-to-build RC plane: a paper-tube fuselage (50 mm-class 
 
 ## Tools & workflow
 
-Everything runs headless through nix — **never download or manually install binaries** (`nix shell` / `nix build` only). OpenSCAD comes from `nixpkgs#openscad-unstable`.
+Everything runs headless through nix — **never download or manually install binaries** (`nix shell` / `nix build` only). OpenSCAD comes from `nixpkgs#openscad-unstable`. No-nix escape hatch (CI, other machines): set `OPENSCAD=/path/to/openscad` and every script uses that binary as-is; the scripts themselves are stdlib-only Python.
 
-- `python3 scripts/regen_all.py` — the single entry point for derived artifacts: gates (params, throw) → all STLs → `main_assembly.png`. Run after ANY .scad change (see the `regen-outputs` skill). `--stl-only` exports just the printable STLs. `--check` is the read-only commit gate (the `verify` skill, and CI): fresh renders are byte-compared against the committed artifacts, so a .scad change can never merge with a stale STL or README image.
+- `python3 scripts/regen_all.py` — the single entry point for derived artifacts: gates (params, throw) → all STLs → `main_assembly.png`. Run after ANY .scad change (see the `regen-outputs` skill). `--stl-only` exports just the printable STLs. `--check` is the read-only commit gate (the `verify` skill, and CI via `.github/workflows/verify.yml`): fresh renders are byte-compared against the committed artifacts, so a .scad change can never merge with a stale STL or README image. The byte comparison self-skips when the running OpenSCAD differs from `stl/openscad_version.txt` (recorded by each full regen); all other checks still run.
 - `python3 scripts/check_params.py` — cross-file interface-dimension check; `[FAIL]` means parts won't fit the same tube. Gate every commit on it.
 - `python3 scripts/throw_check.py` — control-surface throw, pushrod-slot length, and pusher-prop clearance from the shared params (via `scripts/design_params.py`, the Python-side parser of `design_params.scad`).
 - `python3 scripts/render_scad.py <file.scad> <out.png|stl> [openscad args]` — one-off headless renders (see the `openscad-review` skill).
