@@ -165,7 +165,7 @@ module wing_rib_servo() {
 // printed inboard face down there is no overhang and the sockets stand
 // vertical. No cable hole — nothing lives outboard of this rib.
 tip_arch        = 8;   // arch extent beyond the flat band
-tip_arch_slices = 16;
+tip_arch_slices = 24;
 
 // Section extremes, sampled the same way airfoil_poly builds the outline
 tip_naca_t = (naca_code % 100) / 100;
@@ -178,8 +178,11 @@ tip_y_bot = min([for (i = [0 : airfoil_fn])
     camber_y(rib_chord * i / airfoil_fn, rib_chord,
              tip_naca_t, tip_naca_m, tip_naca_p, upper = false)]);
 
-// Height of the arch (top of the remaining section) z into the arch
-function tip_y_lim(z) = tip_y_bot + (tip_y_top - tip_y_bot) * cos(90 * z / tip_arch);
+// Height of the arch (top of the remaining section) z into the arch: a
+// quarter ellipse — a true radius, tangent flat at the top inner corner
+// and vertical at the bottom outer corner, bowing outward in between.
+function tip_y_lim(z) = tip_y_bot + (tip_y_top - tip_y_bot)
+    * sqrt(max(0, 1 - pow(z / tip_arch, 2)));
 
 module wing_rib_tip() {
     assert(tip_y_lim(tip_spar_socket - tip_rib_flat)
