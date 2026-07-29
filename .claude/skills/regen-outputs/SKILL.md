@@ -16,8 +16,9 @@ python3 scripts/regen_all.py --stl-only # all printable STLs, skip the assembly 
 Pipeline:
 1. `scripts/check_params.py` — cross-file interface dimensions must agree (FAIL gates the commit)
 2. `scripts/throw_check.py` — control throw / slot length / prop clearance (FAIL gates too)
-3. every part in `cad/` + `cad/calibration/` → `stl/<name>.stl`
-4. `cad/main_assembly.scad` → `main_assembly.png` (the README image)
+3. `scripts/wing_check.py` — wing span layout: spar fit window, station order, arm-slot clearance (FAIL gates too)
+4. every part in `cad/` + `cad/calibration/` → `stl/<name>.stl`
+5. `cad/main_assembly.scad` → `main_assembly.png` (the README image)
 
 ## Rules
 

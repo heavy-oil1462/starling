@@ -33,19 +33,48 @@ spar_rod_d    = 6;     // carbon rod diameter
 spar_hole_d   = 6.2;   // printed hole for that rod
 spar_spacing  = 20;    // chordwise distance between the two spars
 spar_y_offset = 1.5;   // spar line sits this far above the rib chord line
+spar_x_pos    = 0.4;   // rear spar chord fraction (front spar sits
+                       // spar_spacing further forward, at 20% on a 100 chord)
+spar_socket_lift = 1;  // adapter socket floor sits this far above the sleeve
+                       // bore — rods must never reach the paper tube or they
+                       // jam against it and block the CG slide
 
 // --- Wing geometry ---
 rib_chord     = 100;
 naca_code     = 2415;  // cambered lifting section
 rib_thickness = 2;
+servo_rib_thickness = 4; // the servo rib prints thicker — it reacts the whole
+                         // servo/linkage load until the skin is glued on
+tip_rib_flat  = 3;     // full-profile band at the tip rib's inboard face;
+                       // the foam skin's outboard edge lands on it
 tip_spar_socket = 6;   // blind spar-socket depth in the tip rib; the spar
                        // rods are cut so they END inside these sockets, so
                        // the assembly's spar length derives from this too
+aileron_te_gap  = 2;   // extra TE crop beyond the hinge line so the aileron
+                       // LE can swing under the taped top hinge (see
+                       // cad/wing_rib.scad for the geometry rationale)
 
 // --- Wing adapter <-> root rib interface ---
 wing_tab_thickness = 11; // adapter tab (socket carrier; ribs sit outboard of it)
 wing_tab_span      = 15; // how far the tab reaches out from the sleeve
 adapter_length     = 40; // sleeve length = tab chord extent
+
+// --- Wing span layout (per panel, X from the fuselage centerline) ---
+// Span is a first-class tunable: resize the wing per mission and rod stock
+// by editing these literals, then satisfy scripts/wing_check.py, which
+// enforces the relationships between them (spar fit window, station order,
+// arm-slot clearance) and prints the spar cavity so rods can be cut to
+// match whatever stock is on hand.
+rib_stations         = [47, 120, 200]; // full-chord standard ribs
+wing_servo_station   = 280;  // servo rib REPLACES the row rib here
+aileron_rib_stations = [360];// TE-cropped ribs inside the aileron span
+aileron_root_station = 283;  // = wing_servo_station + servo_rib_thickness/2
+                             //   + 1 mm gap (wing_check.py enforces this)
+aileron_span         = 120;
+tip_station          = 440;  // tip rib inboard face — THE span knob
+spar_rod_len         = 417;  // carbon rod length per spar per side (cut from
+                             // stock; one 500 mm kite rod covers this with a
+                             // single cut) — wing_check.py verifies the fit
 
 // --- Stations along the tube (assembly; wing slides for CG trim) ---
 wing_station       = 300; // wing adapter position, measured from the motor face
@@ -69,6 +98,12 @@ servo_horn_r     = 10;   // full arm length — the wire connects at the far end
 servo_travel_deg = 45;   // used one-sided travel; the arm can do ~±90 (180 total)
                          // but the linkage stays near-linear only within ±45
 ctrl_horn_r      = 10;   // control-surface horn = servo horn -> 1:1 linkage
+aileron_arm_plane = 9.2; // the aileron servo's arm plane sits this far
+                         // outboard of the servo-rib station (flange seat +
+                         // shaft boss + horn plate)
+aileron_arm_x_te  = 39;  // arm-tip chord position, measured from the TE —
+                         // sets where the skin's arm slot goes (gated by
+                         // wing_check.py against the spar and aileron notch)
 
 // Tail linkage geometry. Three 22 mm-wide servos cannot share one height
 // inside the Ø53 bore (corner collisions), so they are STAGGERED in Z:

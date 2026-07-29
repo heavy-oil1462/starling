@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Read-only commit gate for Starling. Renders every part and the assembly to a temp dir and byte-compares against the committed STLs and main_assembly.png, after the param and throw gates. Use when about to commit, before opening a PR, or when asked whether the repo is consistent. Never skip it because "only docs changed" if any .scad or scripts/ file is in the diff.
+description: Read-only commit gate for Starling. Renders every part and the assembly to a temp dir and byte-compares against the committed STLs and main_assembly.png, after the param, throw, and wing gates. Use when about to commit, before opening a PR, or when asked whether the repo is consistent. Never skip it because "only docs changed" if any .scad or scripts/ file is in the diff.
 ---
 
 # Verify
@@ -22,11 +22,13 @@ What it checks, in order:
 
 1. `check_params.py` — no file shadows a design_params.scad name
 2. `throw_check.py` — control throw, slot length, prop clearance
-3. every printable part renders warning-free with manifold status NoError,
+3. `wing_check.py` — wing span layout: spar fit window, station order,
+   arm-slot clearance
+4. every printable part renders warning-free with manifold status NoError,
    AND the fresh render is byte-identical to the committed `stl/<name>.stl`
-4. `main_assembly.png` byte-matches a fresh assembly render (this is the
+5. `main_assembly.png` byte-matches a fresh assembly render (this is the
    README image — a stale one ships a wrong picture of the airframe)
-5. no orphaned files in `stl/` that lack a source part
+6. no orphaned files in `stl/` that lack a source part
 
 ## When it fails
 
@@ -39,9 +41,11 @@ What it checks, in order:
 - `[FAIL]` with warnings or a geometry status — the part itself is broken;
   see the openscad-review skill. This is a modeling error, not a staleness
   error.
-- Param/throw gate failures — shared-dimension or control-geometry
-  violations; fix the value in `cad/design_params.scad`, never a local copy
-  and never the gate's threshold.
+- Param/throw/wing gate failures — shared-dimension, control-geometry, or
+  span-layout violations; fix the value in `cad/design_params.scad`, never
+  a local copy and never the gate's threshold. A wing_check spar-fit
+  failure after a tube batch change is real: re-size `spar_rod_len` (or
+  `tip_station`), do not widen the fit window.
 
 ## Notes
 

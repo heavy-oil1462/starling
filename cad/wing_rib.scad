@@ -80,7 +80,6 @@ module airfoil_poly(c = 100, naca = 0015) {
 //   RIB-LOCAL CONFIGURATION (part-internal, not an interface)
 // ==============================================================================
 
-spar_x_pos = 0.4;             // rear spar at 40% chord (front one lands at 20%)
 cable_hole_diameter = 6;
 cable_hole_x_pos = 0.6;       // fraction of chord
 cable_hole_y_offset = 1.5;
@@ -120,12 +119,11 @@ module wing_rib_with_cutouts(t = rib_thickness, te_crop = 0) {
     }
 }
 
-// Aileron-span rib: TE cropped at the hinge line plus a gap. The gap clears
-// the aileron LE's swing under the taped top hinge (4 mm root thickness
-// swings 4*sin(throw) forward; 2 mm covers past +-25 deg). The cable hole
-// (40 from TE) and the servo bay (33..56 from TE) both survive the crop.
-aileron_te_gap = 2;
-
+// Aileron-span rib: TE cropped at the hinge line plus aileron_te_gap. The
+// gap clears the aileron LE's swing under the taped top hinge (4 mm root
+// thickness swings 4*sin(throw) forward; 2 mm covers past +-25 deg). The
+// cable hole (40 from TE) and the servo bay (33..56 from TE) both survive
+// the crop.
 module wing_rib_aileron() {
     wing_rib_with_cutouts(te_crop = ctrl_chord + aileron_te_gap);
 }
@@ -140,10 +138,8 @@ module wing_rib_aileron() {
 // skin — fair it with tape, or drop to a 5 g servo which fits flush. The
 // strip above the bay thins to ~1.5 mm; the glued-on top skin backs it up.
 // The bay's forward edge keeps ~1 mm of material to the rear spar hole.
-// The servo rib prints thicker than the standard ribs — it reacts the whole
-// servo/linkage load until the skin is on, so it needs the extra stiffness.
-servo_rib_thickness = 4;
-
+// The servo rib prints servo_rib_thickness thick, more than the standard
+// ribs — it reacts the whole servo/linkage load until the skin is on.
 module wing_rib_servo() {
     bay_l    = servo_body[0] + fit_tol;
     bay_h    = servo_body[1] + fit_tol;
@@ -160,13 +156,12 @@ module wing_rib_servo() {
 // Tip rib: replaces the outermost standard rib on each panel. Thicker than
 // the row ribs, with BLIND spar sockets (depth tip_spar_socket from the
 // inboard z=0 face) — the carbon rods are cut to end inside them, so no rod
-// ever pokes out of the tip. Outboard of a full-profile band (where the
-// foam skin edge lands; sand the foam edge into the cap) the section pulls
-// in through offset slices to a rounded cap that closes the tip shape.
-// Print inboard face down: the sockets stand vertical and the cap needs no
-// support. No cable hole — nothing lives outboard of this rib.
-tip_rib_flat   = 3;   // full-profile band at the inboard face
-tip_round      = 5;   // depth of the rounded cap beyond that
+// ever pokes out of the tip. Outboard of the tip_rib_flat full-profile band
+// (where the foam skin edge lands; sand the foam edge into the cap) the
+// section pulls in through offset slices to a rounded cap that closes the
+// tip shape. Print inboard face down: the sockets stand vertical and the
+// cap needs no support. No cable hole — nothing lives outboard of this rib.
+tip_round      = 5;   // depth of the rounded cap beyond the flat band
 tip_shrink     = 4;   // how far the profile pulls in at the outermost face
 tip_cap_slices = 16;
 
