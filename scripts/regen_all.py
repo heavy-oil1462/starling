@@ -10,6 +10,7 @@ Pipeline:
      (wing span layout relationships)
   2. every part in cad/ + cad/calibration/  -> stl/<name>.stl
   3. 2D cut templates (SVG_PARTS)     -> templates/<name>.svg (print 1:1)
+     + A4-tiled PDFs (PDF_TILES)      -> templates/<name>_a4.pdf
   4. cad/main_assembly.scad           -> main_assembly.png (README image)
 
 STLs are committed build products (print-ready). A part whose STL gains a
@@ -42,6 +43,7 @@ import tempfile
 from pathlib import Path
 
 from render_scad import render, openscad_version
+from tile_template import tile_a4
 
 ROOT = Path(__file__).resolve().parent.parent
 PARTS_DIRS = [ROOT / "cad", ROOT / "cad" / "calibration"]
@@ -49,8 +51,11 @@ PARTS_DIRS = [ROOT / "cad", ROOT / "cad" / "calibration"]
 # and fuselage (paper tube) / servo_9g (bought servo) are visual models only.
 NON_PARTS = {"main_assembly", "design_params", "fuselage", "servo_9g"}
 # 2D cut templates: rendered to SVG (mm units, print 1:1), not STL. Committed
-# under templates/ and byte-checked like every other artifact.
+# under templates/ and byte-checked like every other artifact. Each template
+# also ships as an A4-tiled PDF (tile_template.py) so a home printer covers
+# it: three portrait pages, overlap, alignment crosses.
 SVG_PARTS = {"wing_skin": Path("templates") / "wing_skin.svg"}
+PDF_TILES = {"wing_skin": Path("templates") / "wing_skin_a4.pdf"}
 # Which OpenSCAD build produced the committed artifacts. Byte equality only
 # holds within one build, so --check compares bytes only when the running
 # version matches this file.
@@ -62,6 +67,21 @@ def parts():
         for p in sorted(d.glob("*.scad")):
             if p.stem not in NON_PARTS and p.stem not in SVG_PARTS:
                 yield p
+
+
+def derive_one(func, src: Path, out: Path, expect: Path = None,
+               shown: Path = None) -> bool:
+    """Derive out from an already-rendered artifact via func(src, out);
+    with expect set (check mode), byte-compare like run_one."""
+    func(src, out)
+    stale = expect is not None and (
+        not expect.exists() or expect.read_bytes() != out.read_bytes())
+    shown = shown or expect or out
+    print(f"[{'STALE' if stale else 'ok'}] {src.name} -> {shown.relative_to(ROOT)}")
+    if stale:
+        print("        committed artifact does not match its sources —"
+              " run scripts/regen_all.py and commit the result")
+    return not stale
 
 
 def run_one(scad: Path, out: Path, expect: Path = None, shown: Path = None) -> bool:
@@ -127,7 +147,12 @@ def main(argv):
                     continue
                 if not check:
                     (ROOT / rel).parent.mkdir(exist_ok=True)
-                ok &= run_one(ROOT / "cad" / f"{stem}.scad", *target(ROOT / rel))
+                svg_out, svg_expect, svg_shown = target(ROOT / rel)
+                ok &= run_one(ROOT / "cad" / f"{stem}.scad",
+                              svg_out, svg_expect, svg_shown)
+                if stem in PDF_TILES and svg_out.exists():
+                    ok &= derive_one(tile_a4, svg_out,
+                                     *target(ROOT / PDF_TILES[stem]))
 
         if not stl_only and (not only or "main_assembly" in only):
             ok &= run_one(ROOT / "cad" / "main_assembly.scad",
@@ -139,9 +164,10 @@ def main(argv):
             if f.name not in expected:
                 print(f"[STALE] {f.relative_to(ROOT)} has no source part — delete it")
                 ok = False
-        expected_svg = {ROOT / rel for rel in SVG_PARTS.values()}
-        for f in sorted((ROOT / "templates").glob("*.svg")):
-            if f not in expected_svg:
+        expected_tpl = {ROOT / rel
+                        for rel in [*SVG_PARTS.values(), *PDF_TILES.values()]}
+        for f in sorted((ROOT / "templates").glob("*.*")):
+            if f not in expected_tpl:
                 print(f"[STALE] {f.relative_to(ROOT)} has no source part — delete it")
                 ok = False
 

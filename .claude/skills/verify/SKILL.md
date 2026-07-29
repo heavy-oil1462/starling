@@ -27,7 +27,9 @@ What it checks, in order:
 4. every printable part renders warning-free with manifold status NoError,
    AND the fresh render is byte-identical to the committed `stl/<name>.stl`
 5. every 2D template renders warning-free and byte-matches its committed
-   `templates/<name>.svg`
+   `templates/<name>.svg`, and the A4-tiled `templates/<name>_a4.pdf`
+   derived from it byte-matches too (tile_template.py writes PDFs
+   deterministically: no timestamps, no compression)
 6. `main_assembly.png` byte-matches a fresh assembly render (this is the
    README image — a stale one ships a wrong picture of the airframe)
 7. no orphaned files in `stl/` or `templates/` that lack a source part

@@ -47,8 +47,12 @@ Tooling, printed once per printer/filament, reused across airframes:
 (squares ribs while gluing), 2x `stl/skin_cradle.stl` (holds the panel
 level), and `stl/wing_adapter.stl` (the clamping CG trim rig).
 
-Print `templates/wing_skin.svg` at 1:1 (tile A4/letter pages) and confirm
-the 100 mm scale bar with a ruler before cutting anything.
+Print `templates/wing_skin_a4.pdf` on plain A4 (or letter) at 100% /
+actual size — never "fit to page". It is three portrait pages tiled along
+the span: lay them so the printed alignment crosses coincide, tape, and
+confirm the 100 mm scale bar with a ruler before cutting anything.
+`templates/wing_skin.svg` is the same template as a single sheet, for A3
+printers or cutting plotters.
 
 ## Station table (defaults; `design_params.scad` is the source)
 
