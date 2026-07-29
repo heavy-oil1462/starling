@@ -13,7 +13,7 @@ Open-source, cheap, quick-to-build RC plane: a paper-tube fuselage (50 mm-class 
 
 - `cad/design_params.scad` — **single source of truth** for every dimension two parts share. Parts `include` it; `check_params.py` fails the build if any file shadows one of its names. Change shared values there and only there.
 - `cad/` — one .scad per printable part + `main_assembly.scad` (visual fit check, renders to `main_assembly.png`; all placement derives from design_params, e.g. `wing_station`)
-- `cad/calibration/` — small test prints for dialing in fits (tube OD ring, tube bore gauge, motor pattern, servo pocket). Gauges print as 3 numbered variants; the user prints one, picks the best fit, and types that number into `design_params.scad`.
+- `cad/calibration/` — small test prints for dialing in fits (tube OD ring, tube bore gauge, spar fit gauge, motor pattern, servo pocket). Gauges print as 3 numbered variants; the user prints one, picks the best fit, and types that number into `design_params.scad`.
 - `cad/lib/` — shared OpenSCAD helper modules, not printable parts (regen_all does not scan it)
 - `cad/archive/` — dead versions, never rendered or reviewed
 - `stl/` — committed build products, print-ready; regenerate, never hand-edit
@@ -40,7 +40,7 @@ Conventions:
 ## Key off-the-shelf parts
 
 - Fuselage: ~53 mm OD paper/postal tube. `tube_od` AND `tube_id` are both measured per batch (paper wall varies, so OD does not predict the bore) — calibrate with `tube_fit_ring.scad` before trusting a sleeve and `tube_bore_gauge.scad` before trusting a plug
-- Wing spars: 6 mm carbon rods (6.2 mm printed holes)
+- Wing spars: 6 mm carbon rods (`spar_hole_d` printed holes — calibrate with `spar_fit_gauge.scad` before printing a rib set)
 - Servos: 9 g class (SG90 footprint), all mounted INTERNALLY — tail servos on pads inside the sleeve, aileron servos carried by a servo rib (`wing_rib_servo.scad`); wire pushrods exit through small slots (drag rule: nothing but the slot meets the airflow). Throw/slot/clearance numbers: `scripts/throw_check.py`, rationale in `docs/control-system.md`.
 - Pushrods: 1.2 mm piano wire; control surfaces hinge on a tape/PP strip glued into matching grooves (never a printed living hinge)
 - Motor: 16×19 mm screw pattern (22xx class), rear-mounted (pusher)
