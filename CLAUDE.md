@@ -17,6 +17,7 @@ Open-source, cheap, quick-to-build RC plane: a paper-tube fuselage (50 mm-class 
 - `cad/lib/` — shared OpenSCAD helper modules, not printable parts (regen_all does not scan it)
 - `cad/archive/` — dead versions, never rendered or reviewed
 - `stl/` — committed build products, print-ready; regenerate, never hand-edit
+- `templates/` — committed 2D cut templates (SVG, mm units, print 1:1), same regenerate-never-hand-edit rule; sources are 2D .scad parts listed in `regen_all.py`'s `SVG_PARTS` (currently `cad/wing_skin.scad`, the foam-skin wrap for one wing panel)
 - `scripts/` — Python tools (see below)
 - `docs/` — design notes and reviews
 

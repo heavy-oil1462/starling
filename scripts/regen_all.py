@@ -9,7 +9,8 @@ Pipeline:
      scripts/throw_check.py (control throws), scripts/wing_check.py
      (wing span layout relationships)
   2. every part in cad/ + cad/calibration/  -> stl/<name>.stl
-  3. cad/main_assembly.scad           -> main_assembly.png (README image)
+  3. 2D cut templates (SVG_PARTS)     -> templates/<name>.svg (print 1:1)
+  4. cad/main_assembly.scad           -> main_assembly.png (README image)
 
 STLs are committed build products (print-ready). A part whose STL gains a
 second volume or errors out is a finding, not something to ignore.
@@ -47,6 +48,9 @@ PARTS_DIRS = [ROOT / "cad", ROOT / "cad" / "calibration"]
 # Not printable parts: the assembly renders to PNG, design_params is data,
 # and fuselage (paper tube) / servo_9g (bought servo) are visual models only.
 NON_PARTS = {"main_assembly", "design_params", "fuselage", "servo_9g"}
+# 2D cut templates: rendered to SVG (mm units, print 1:1), not STL. Committed
+# under templates/ and byte-checked like every other artifact.
+SVG_PARTS = {"wing_skin": Path("templates") / "wing_skin.svg"}
 # Which OpenSCAD build produced the committed artifacts. Byte equality only
 # holds within one build, so --check compares bytes only when the running
 # version matches this file.
@@ -56,7 +60,7 @@ VERSION_FILE = ROOT / "stl" / "openscad_version.txt"
 def parts():
     for d in PARTS_DIRS:
         for p in sorted(d.glob("*.scad")):
-            if p.stem not in NON_PARTS:
+            if p.stem not in NON_PARTS and p.stem not in SVG_PARTS:
                 yield p
 
 
@@ -117,6 +121,14 @@ def main(argv):
                 continue
             ok &= run_one(scad, *target(ROOT / "stl" / f"{scad.stem}.stl"))
 
+        if not stl_only:
+            for stem, rel in SVG_PARTS.items():
+                if only and stem not in only:
+                    continue
+                if not check:
+                    (ROOT / rel).parent.mkdir(exist_ok=True)
+                ok &= run_one(ROOT / "cad" / f"{stem}.scad", *target(ROOT / rel))
+
         if not stl_only and (not only or "main_assembly" in only):
             ok &= run_one(ROOT / "cad" / "main_assembly.scad",
                           *target(ROOT / "main_assembly.png"))
@@ -125,6 +137,11 @@ def main(argv):
         expected = {f"{p.stem}.stl" for p in parts()}
         for f in sorted((ROOT / "stl").glob("*.stl")):
             if f.name not in expected:
+                print(f"[STALE] {f.relative_to(ROOT)} has no source part — delete it")
+                ok = False
+        expected_svg = {ROOT / rel for rel in SVG_PARTS.values()}
+        for f in sorted((ROOT / "templates").glob("*.svg")):
+            if f not in expected_svg:
                 print(f"[STALE] {f.relative_to(ROOT)} has no source part — delete it")
                 ok = False
 

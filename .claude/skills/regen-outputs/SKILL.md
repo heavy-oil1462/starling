@@ -18,7 +18,8 @@ Pipeline:
 2. `scripts/throw_check.py` — control throw / slot length / prop clearance (FAIL gates too)
 3. `scripts/wing_check.py` — wing span layout: spar fit window, station order, arm-slot clearance (FAIL gates too)
 4. every part in `cad/` + `cad/calibration/` → `stl/<name>.stl`
-5. `cad/main_assembly.scad` → `main_assembly.png` (the README image)
+5. every 2D template in `SVG_PARTS` → `templates/<name>.svg` (print 1:1; skipped by `--stl-only`)
+6. `cad/main_assembly.scad` → `main_assembly.png` (the README image)
 
 ## Rules
 
