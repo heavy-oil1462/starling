@@ -157,25 +157,48 @@ module wing_rib_servo() {
 // the row ribs, with BLIND spar sockets (depth tip_spar_socket from the
 // inboard z=0 face) — the carbon rods are cut to end inside them, so no rod
 // ever pokes out of the tip. Outboard of the tip_rib_flat full-profile band
-// (where the foam skin edge lands; sand the foam edge into the cap) the
-// section pulls in through offset slices to a rounded cap that closes the
-// tip shape. Print inboard face down: the sockets stand vertical and the
-// cap needs no support. No cable hole — nothing lives outboard of this rib.
-tip_round      = 5;   // depth of the rounded cap beyond the flat band
-tip_shrink     = 4;   // how far the profile pulls in at the outermost face
-tip_cap_slices = 16;
+// (where the foam skin edge lands; sand the foam edge into it) the UPPER
+// surface arches down along a quarter ellipse from the full section to the
+// lower surface's outboard edge — a Hoerner-style tip: the sharp bottom
+// edge keeps the tip vortex outboard and off the wing's upper surface.
+// Every arch slice removes material only from the TOP of the section, so
+// printed inboard face down there is no overhang and the sockets stand
+// vertical. No cable hole — nothing lives outboard of this rib.
+tip_arch        = 8;   // arch extent beyond the flat band
+tip_arch_slices = 16;
+
+// Section extremes, sampled the same way airfoil_poly builds the outline
+tip_naca_t = (naca_code % 100) / 100;
+tip_naca_m = floor(naca_code / 1000) / 100;
+tip_naca_p = (floor(naca_code / 100) % 10) / 10;
+tip_y_top = max([for (i = [0 : airfoil_fn])
+    camber_y(rib_chord * i / airfoil_fn, rib_chord,
+             tip_naca_t, tip_naca_m, tip_naca_p, upper = true)]);
+tip_y_bot = min([for (i = [0 : airfoil_fn])
+    camber_y(rib_chord * i / airfoil_fn, rib_chord,
+             tip_naca_t, tip_naca_m, tip_naca_p, upper = false)]);
+
+// Height of the arch (top of the remaining section) z into the arch
+function tip_y_lim(z) = tip_y_bot + (tip_y_top - tip_y_bot) * cos(90 * z / tip_arch);
 
 module wing_rib_tip() {
-    assert(tip_rib_flat + tip_round >= tip_spar_socket + 1.5,
-           "spar socket would break through the tip cap");
+    assert(tip_y_lim(tip_spar_socket - tip_rib_flat)
+           >= spar_y_offset + spar_hole_d / 2 + 1.2,
+           "spar socket would break through the tip arch");
+    slice = tip_arch / tip_arch_slices;
     difference() {
         union() {
             linear_extrude(height = tip_rib_flat) rib_profile();
-            for (i = [0 : tip_cap_slices - 1])
-                translate([0, 0, tip_rib_flat + tip_round * i / tip_cap_slices])
-                    linear_extrude(height = tip_round / tip_cap_slices + 0.02)
-                        offset(r = -tip_shrink * (1 - cos(90 * i / tip_cap_slices)))
+            for (i = [0 : tip_arch_slices - 1])
+                translate([0, 0, tip_rib_flat + i * slice])
+                    linear_extrude(height = slice + 0.02)
+                        intersection() {
                             rib_profile();
+                            translate([-1, tip_y_bot - 1])
+                                square([rib_chord + 2,
+                                        max(tip_y_lim((i + 1) * slice)
+                                            - tip_y_bot, 0.5) + 1]);
+                        }
         }
 
         for (dx = [0, spar_spacing])
