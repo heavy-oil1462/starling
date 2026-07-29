@@ -42,6 +42,11 @@ from the params, not the other way round. The cutting truth for the skin is
 | Tape | 1 roll | fiber or packing tape: aileron hinge + servo fairing | anywhere |
 | CA glue (or epoxy) | 1 | ribs to rods, rods into sockets, skin seams | anywhere |
 
+Tooling, printed once per printer/filament, reused across airframes:
+`stl/spar_fit_gauge.stl` (calibrates `spar_hole_d`), `stl/rib_square_jig.stl`
+(squares ribs while gluing), 2x `stl/skin_cradle.stl` (holds the panel
+level), and `stl/wing_adapter.stl` (the clamping CG trim rig).
+
 Print `templates/wing_skin.svg` at 1:1 (tile A4/letter pages) and confirm
 the 100 mm scale bar with a ruler before cutting anything.
 
@@ -57,30 +62,37 @@ the 100 mm scale bar with a ruler before cutting anything.
 
 ## Build sequence (per panel)
 
-1. Print the ribs; deburr the spar holes until a rod slides through without
-   force.
-2. Thread all ribs onto both rods in station order (tip rib last, blind
+1. Calibrate first: print `stl/spar_fit_gauge.stl`, push a rod through the
+   three holes, and type the number of the best fit (slides fully, no
+   wobble) into `spar_hole_d` in `cad/design_params.scad`. Regenerate and
+   only then print the rib set.
+2. Print the ribs; a rod should slide through without force.
+3. Thread all ribs onto both rods in station order (tip rib last, blind
    sockets outboard). Set each rib at its station, measuring from the rod's
    inboard end plus the adapter engagement (the inboard ~15 mm of rod stays
    bare for the adapter sockets — `wing_check.py` prints the exact
    engagement numbers).
-3. Seat the rod ends in the tip rib's blind sockets, square every rib to
-   the rods, then CA each rib to both rods.
-4. Mount the aileron servo in the servo rib's open-bottom bay: flange seats
+4. Seat the rod ends in the tip rib's blind sockets. Square each rib with
+   `stl/rib_square_jig.stl`: slide the jig against the rib, press the rib
+   flush against its face, CA the rib to both rods, move to the next
+   station.
+5. Mount the aileron servo in the servo rib's open-bottom bay: flange seats
    on the outboard face, arm up. Route the lead inboard through the rib
    cable holes. Tack the flange with CA or strapping tape
    (docs/control-system.md has the linkage details).
-5. Cut the skin blank from the printed template: transfer the fold line,
+6. Cut the skin blank from the printed template: transfer the fold line,
    spar lines, and station marks; cut the servo-arm slot and the aileron
    corner cut-offs BEFORE skinning. Flip the foam for the mirror panel.
-6. Score the fold line, crack the foam over a table edge, and glue the
-   lower surface to the rib TEs first; then wrap over the LE and glue the
-   upper surface, spar lines over the spars. Trim the upper TE to the lower
-   TE edge. Sand the outboard edge flush into the tip rib's cap.
-7. Hinge the aileron with tape along the top surface per
+7. Rest the frame in two `stl/skin_cradle.stl` saddles. Score the fold
+   line, crack the foam over a table edge, and glue the lower surface to
+   the rib TEs first; then wrap over the LE and glue the upper surface,
+   spar lines over the spars. Trim the upper TE to the lower TE edge. Sand
+   the outboard edge flush into the tip rib's cap. The skinned panel sits
+   snug in the cradles for the remaining steps.
+8. Hinge the aileron with tape along the top surface per
    docs/control-system.md; Z-bend the pushrod between servo arm and horn.
    Verify throws move freely over the range `scripts/throw_check.py`
    reports.
-8. At final assembly, bond the bare rod ends into the wing adapter sockets
+9. At final assembly, bond the bare rod ends into the wing adapter sockets
    (CA/epoxy — the sockets alone are alignment, not structure) and trim CG
    per docs/wing-stations.md.

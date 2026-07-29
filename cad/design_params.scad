@@ -43,6 +43,8 @@ spar_socket_lift = 1;  // adapter socket floor sits this far above the sleeve
 rib_chord     = 100;
 naca_code     = 2415;  // cambered lifting section
 rib_thickness = 2;
+skin_thickness = 5;    // foam-board skin (bought sheet); the skin cradle
+                       // jig offsets the rib profile by this
 servo_rib_thickness = 4; // the servo rib prints thicker — it reacts the whole
                          // servo/linkage load until the skin is glued on
 tip_rib_flat  = 3;     // full-profile band at the tip rib's inboard face;
