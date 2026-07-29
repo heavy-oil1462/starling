@@ -101,8 +101,9 @@ normal prop adapter provides.
 
 ## Open items
 
-- The aileron servo's arm slot in the upper foam skin (~4 × 20 mm) is cut at
-  build time — mark it from the mount position before skinning.
+- The aileron servo's arm slot in the upper foam skin is printed on the skin
+  cut template (`templates/wing_skin.svg`, position gated by
+  `scripts/wing_check.py`) — cut it before skinning, per docs/wing-build.md.
 - Wire ends: Z-bend at the servo arm tip, and a Z-bend or micro linkage
   stopper at the control horn (nothing printed needed).
 - Rudder + both elevators use identical geometry; differential/mixing is a

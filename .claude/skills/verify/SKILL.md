@@ -26,9 +26,11 @@ What it checks, in order:
    arm-slot clearance
 4. every printable part renders warning-free with manifold status NoError,
    AND the fresh render is byte-identical to the committed `stl/<name>.stl`
-5. `main_assembly.png` byte-matches a fresh assembly render (this is the
+5. every 2D template renders warning-free and byte-matches its committed
+   `templates/<name>.svg`
+6. `main_assembly.png` byte-matches a fresh assembly render (this is the
    README image — a stale one ships a wrong picture of the airframe)
-6. no orphaned files in `stl/` that lack a source part
+7. no orphaned files in `stl/` or `templates/` that lack a source part
 
 ## When it fails
 
@@ -62,3 +64,10 @@ What it checks, in order:
 - Running without nix anywhere: set OPENSCAD=/path/to/openscad and all
   scripts use that binary as-is (this is how CI works). The scripts are
   stdlib-only Python, so no pip install is needed either.
+- Parts using text() (the SVG templates) print "Fontconfig error: Cannot
+  load default config file" on stderr in the sandbox. Lowercase "error" —
+  deliberately not matched by the WARNING/ERROR filter; the glyphs still
+  render. Glyph outlines depend on the machine's fonts, so template SVGs
+  can byte-differ across machines even on the same OpenSCAD build; the
+  version self-skip usually hides this, but if a template alone flags
+  [STALE] on a new machine with matching versions, suspect fonts first.
