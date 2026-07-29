@@ -5,7 +5,9 @@ Run after ANY change to cad/*.scad — never hand-compose openscad command
 lines (see the regen-outputs skill).
 
 Pipeline:
-  1. scripts/check_params.py          — interface dimensions must agree
+  1. gates: scripts/check_params.py (interface dimensions must agree),
+     scripts/throw_check.py (control throws), scripts/wing_check.py
+     (wing span layout relationships)
   2. every part in cad/ + cad/calibration/  -> stl/<name>.stl
   3. cad/main_assembly.scad           -> main_assembly.png (README image)
 
@@ -100,7 +102,7 @@ def main(argv):
                   "self-skips; every other check runs at full strength")
 
     ok = True
-    for gate in ("check_params.py", "throw_check.py"):
+    for gate in ("check_params.py", "throw_check.py", "wing_check.py"):
         ok &= subprocess.run([sys.executable, str(ROOT / "scripts" / gate)]).returncode == 0
 
     (ROOT / "stl").mkdir(exist_ok=True)

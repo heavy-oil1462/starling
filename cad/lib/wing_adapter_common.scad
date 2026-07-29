@@ -25,16 +25,16 @@ module wa_solid() {
             cube([wing_tab_span + wa_overlap, wing_tab_thickness, adapter_length]);
 }
 
-// Tube bore + rod sockets. The sockets run from the tab tip to a 1 mm
-// floor above the bore (~17 mm engagement); the rods must never reach the
-// bore or they jam against the paper tube and block the CG slide. Bond
-// the rods in with CA/epoxy for flight — the sockets alone are alignment,
-// not structure.
+// Tube bore + rod sockets. The sockets run from the tab tip to a floor
+// spar_socket_lift above the bore (~17 mm engagement); the rods must never
+// reach the bore or they jam against the paper tube and block the CG slide.
+// Bond the rods in with CA/epoxy for flight — the sockets alone are
+// alignment, not structure.
 module wa_cuts() {
     translate([0, 0, -0.1])
         cylinder(h = adapter_length + 0.2, r = wa_tube_r());
 
-    socket_depth = (wa_tab_tip_x() + 0.1) - (wa_tube_r() + 1);
+    socket_depth = (wa_tab_tip_x() + 0.1) - (wa_tube_r() + spar_socket_lift);
     for (z = wa_spar_z())
         for (m = [0, 1]) mirror([m, 0, 0])
             translate([wa_tab_tip_x() + 0.1, 0, z])
